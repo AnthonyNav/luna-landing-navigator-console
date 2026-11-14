@@ -8,19 +8,20 @@ const RETRY_S = 20
 export function OfflineBanner() {
   const health = useMissionStore((s) => s.health)
   const error = useMissionStore((s) => s.error)
+  // Montado solo mientras dura la caída: la cuenta regresiva arranca de cero cada vez.
+  return !health && error?.code === 'ERR_NETWORK' ? <OfflineNotice /> : null
+}
+
+function OfflineNotice() {
   const init = useMissionStore((s) => s.init)
-  const offline = !health && error?.code === 'ERR_NETWORK'
   const [left, setLeft] = useState(RETRY_S)
   useEffect(() => {
-    if (!offline) return
-    setLeft(RETRY_S)
     const id = setInterval(() => setLeft((s) => {
       if (s <= 1) { void init(); return RETRY_S }
       return s - 1
     }), 1000)
     return () => clearInterval(id)
-  }, [offline, init])
-  if (!offline) return null
+  }, [init])
   return (
     <div role="alert" className="glass pointer-events-auto flex max-w-[420px] items-start gap-3 rounded-2xl p-3.5 ring-1 ring-caution/40"
       style={{ ['--glass-fill' as string]: 'rgb(42 29 16 / 0.7)' }}>
