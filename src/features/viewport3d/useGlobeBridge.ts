@@ -7,7 +7,9 @@ import type { ToGlobe } from './globeProtocol'
 
 /**
  * Puente con el globo (docs/11 §3). Único archivo que habla con el iframe.
- * - El globo se desmonta al pasar a la escena local: cada READY reenvía el estado completo.
+ * - El iframe no se desmonta al simular (SceneBackground): normalmente hay un solo READY. Si el globo
+ *   se recarga, cada READY reenvía el estado completo.
+ * - La simulación ocurre en el globo: al evaluar vuela al sitio y la escena de alunizaje parte de esa vista.
  * - Sol y Tierra siguen al scrubber (cero red, D-003), agrupados por fotograma.
  * - Si el globo no responde READY en 8 s, la consola sigue sin él (`link: 'unavailable'`).
  */
@@ -32,6 +34,11 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
       sendSky() // el Sol y la Tierra reales del paso actual deben llegar antes que la escena
       post(play)
     }
+    // Vuelo suave del globo hasta el sitio (SELECT_SITE vuela ~2,5 s; SET_VIEW salta sin animación)
+    const flyToSelected = () => {
+      const s = mission().selected
+      if (s) post({ type: 'SELECT_SITE', payload: { id: s.id, lat: s.lat, lon: s.lon, label: s.label } })
+    }
     const pushAll = () => {
       const m = mission()
       sendSites()
@@ -39,7 +46,7 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
       const psr = psrItems(m.psrs)
       if (psr.length) post({ type: 'SET_PSR', payload: psr })
       if (globe().landing.requested) startLanding()
-      else if (m.selected) post({ type: 'SELECT_SITE', payload: { id: m.selected.id, lat: m.selected.lat, lon: m.selected.lon, label: m.selected.label } })
+      else flyToSelected()
     }
 
     const onMessage = (e: MessageEvent) => {
@@ -74,12 +81,15 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
         raf = requestAnimationFrame(sendSky)
       }
       if (s.psrs !== p.psrs) post({ type: 'SET_PSR', payload: psrItems(s.psrs) })
-      if (s.selected !== p.selected && s.selected && !globe().landing.requested) {
-        post({ type: 'SELECT_SITE', payload: { id: s.selected.id, lat: s.selected.lat, lon: s.selected.lon, label: s.selected.label } })
-      }
+      // Elegir un sitio o terminar una corrida recentra el globo en él (salvo durante la escena)
+      const reran = s.evaluation !== p.evaluation && s.evaluation !== null
+      if (((s.selected !== p.selected && s.selected) || reran) && !globe().landing.requested) flyToSelected()
     })
     const unsubGlobe = useGlobeStore.subscribe((s, p) => {
-      if (ready && s.landing.requested && !p.landing.requested) startLanding()
+      if (!ready) return
+      if (s.landing.requested && !p.landing.requested) startLanding()
+      // Salir de la escena (o un error): el globo limpia módulo y polvo y vuelve a encuadrar el sitio
+      if (!s.landing.requested && p.landing.requested) { post({ type: 'STOP_LANDING_SCENE' }); flyToSelected() }
     })
 
     return () => {

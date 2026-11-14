@@ -190,6 +190,9 @@
   & > :nth-child(n + 6) { animation-delay: 190ms; }
 }
 @utility pour { animation: pour 900ms var(--ease-out) both; }
+/* Cambio de render (globo ⇄ escena local): fundido sin desplazamiento */
+@keyframes fade-in { from { opacity: 0; } }
+@utility fade-in { animation: fade-in 500ms var(--ease-out) both; }
 @utility drip { animation: drip 280ms var(--ease-out) both; transform-origin: 50% 0; }
 @utility breathe { animation: breathe 1.6s ease-in-out infinite; }
 /* Estado recién calculado: se enciende dos veces y queda fijo */

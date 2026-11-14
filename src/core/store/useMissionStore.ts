@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { GLOBE_URL } from '@/core/config'
+import { useGlobeStore } from './useGlobeStore'
 import { api } from '@/core/api/endpoints'
 import { ApiError } from '@/core/api/errors'
 import { toUtcIso } from '@/core/utils/time'
@@ -118,7 +120,10 @@ export const useMissionStore = create<MissionState>((set, get) => ({
         api.terrainPatch({ lat, lon, size_km: 12, resolution: 128 }),
         api.psrNearby({ lat, lon }),
       ])
-      set({ evaluation, terrain, psrs, loading: false, viewMode: 'site', lastRunMs: performance.now() - t0 })
+      // Con el globo disponible la simulación se queda en él (vuelo continuo, sin cambio de motor);
+      // la escena local del parche queda como "Terrain detail". Sin globo, la escena local es el fondo.
+      const globeOk = !!GLOBE_URL && useGlobeStore.getState().link !== 'unavailable'
+      set({ evaluation, terrain, psrs, loading: false, viewMode: globeOk ? 'globe' : 'site', lastRunMs: performance.now() - t0 })
     } catch (e) { set({ error: e as ApiError, loading: false }) }
   },
   backToGlobe: () => set({ viewMode: 'globe', playing: false }),
