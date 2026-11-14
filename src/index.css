@@ -1,20 +1,116 @@
 @import "tailwindcss";
 
-/* Paleta "Deep Space Mission Control" (docs/ideas/lunar-landing-ui-ux-tdd.md, no vinculante) */
+/*
+ * Tokens del Figma (handoff: docs/ideas/console-ui-figma.md, no vinculante).
+ * Colecciones "Lunar / Primitives" y "Lunar / Semantic"; nombres alineados con su codeSyntax.
+ */
 @theme {
-  --color-space: #090d16;
-  --color-surface: #111827;
-  --color-line: #1f2937;
-  --color-sun: #f59e0b;
-  --color-earth: #38bdf8;
-  --color-psr: #818cf8;
-  --color-go: #10b981;
-  --color-caution: #f59e0b;
-  --color-nogo: #ef4444;
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-sky: #04060a;
+  --color-ink: #f4f1ea;
+  --color-ink-2: rgb(244 241 234 / 0.72);
+  --color-ink-3: rgb(244 241 234 / 0.52);
+  --color-line: rgb(255 255 255 / 0.14);
+  --color-hairline: rgb(255 255 255 / 0.08);
+  --color-sun: #ffc65c;
+  --color-earth: #5bbdff;
+  --color-psr: #9590ff;
+  --color-go: #3edb9b;
+  --color-caution: #ff9f45;
+  --color-nogo: #ff5e6e;
+  --color-regolith: #e6dfd3;
+
+  --font-sans: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --glass-fill: rgb(16 20 28 / 0.44);
+  --glass-fill-strong: rgb(16 20 28 / 0.66);
+  --glass-blur: blur(18px) saturate(140%);
+  /* Glass/Panel: bisel (luz arriba, sombra abajo), sombra de elevación y halo de retroiluminación */
+  --shadow-panel:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    inset 0 12px 24px -6px rgb(255 255 255 / 0.07),
+    inset 0 -2px 6px rgb(0 0 0 / 0.45),
+    0 30px 60px -12px rgb(0 0 0 / 0.7),
+    0 6px 14px -4px rgb(0 0 0 / 0.4),
+    0 0 44px rgb(158 196 255 / 0.18);
+  --shadow-raised:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -1px 2px rgb(0 0 0 / 0.35),
+    0 6px 14px -4px rgb(0 0 0 / 0.5),
+    0 1px 3px rgb(0 0 0 / 0.25);
+  --shadow-inset: inset 0 2px 5px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.08);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html, body, #root { height: 100%; }
-body { margin: 0; background: var(--color-space); color: #e5e7eb; overflow: hidden; font-family: var(--font-sans); }
-.tnum { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-sky);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgb(255 198 92 / 0.35); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-earth); outline-offset: 2px; border-radius: 10px; }
+* { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.18) transparent; }
+input, button, select { font: inherit; color: inherit; }
+input::placeholder { color: var(--color-ink-3); }
+
+/* Números que cambian mientras se mueve el slider: sin "jitter" */
+@utility tnum { font-variant-numeric: tabular-nums; }
+
+/* Panel de vidrio con borde iluminado (gradiente) vía máscara */
+@utility glass {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 45%, rgb(0 0 0 / 0.2)),
+    var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-panel);
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.04) 35%, rgb(255 255 255 / 0.12));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+@utility glass-strong { --glass-fill: var(--glass-fill-strong); }
+
+/* Control en relieve: pastillas activas, pozos de ícono, botones secundarios */
+@utility raised {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.06));
+  box-shadow: var(--shadow-raised);
+}
+/* Hundido en el vidrio: inputs, contenedores segmentados, canales de barras */
+@utility inset-well {
+  background: rgb(10 13 19 / 0.4);
+  box-shadow: var(--shadow-inset);
+}
+/* Botón primario: tecla que emite luz */
+@utility btn-primary {
+  background: linear-gradient(180deg, #ffffff, #dcd3c3);
+  color: #0a0d13;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 3px rgb(0 0 0 / 0.18),
+    0 0 22px rgb(255 244 220 / 0.35),
+    0 8px 18px -6px rgb(0 0 0 / 0.6);
+}
+/* Retroiluminación por color de señal: usa currentColor */
+@utility glow { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), 0 0 6px color-mix(in srgb, currentColor 90%, transparent), 0 0 16px color-mix(in srgb, currentColor 45%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
