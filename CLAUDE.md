@@ -61,7 +61,7 @@ Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala
 
 Fase 1 de pantallas (rama `feat/consola-glass`): cascarón con render de fondo y paneles glass, Simulate (Simple/Detailed), Compare, History (localStorage), Missions (alunizajes reales con fuentes citadas), estados de carga/error/offline y pantalla completa.
 Fondo (handoff `docs/11`, D-013): `viewMode` `globe` sin sitio evaluado y `site` tras evaluar; un solo render montado. El iframe del globo se monta si existe `VITE_GLOBE_URL`; si no, placeholder.
-Falta: puente con el globo (`useGlobeBridge` + `globeProtocol.ts`, timeout de `READY`). El globo ya tiene fases 2 y 3, así que el puente debe enviar también `SET_EARTH_LOCAL`, `SET_PSR` y, con un interruptor, `SET_VEHICLES` (mensajes y reglas de rotulado en `docs/11` §3, §6 y §6b). También faltan la capa PSR y los modos de cámara en la escena local, timelines por escenario en Compare (el contrato de `/compare` solo trae resúmenes), video y AI disclosure.
+Puente con el globo (rama `feat/globe-bridge`): `globeProtocol.ts` (tipos, única copia del protocolo), `globeBridge.ts` (funciones puras con pruebas), `useGlobeBridge.ts` (único archivo que habla con el iframe) y `useGlobeStore`. Envía sitios, Sol y Tierra del paso del scrubber (`sun_vector_3d`/`earth_vector_3d` tal cual), PSR y la escena de alunizaje (botón "Landing scene", que pasa al globo y vuelve con "Exit scene"). `SITE_CLICKED`/`GLOBE_CLICKED` solo seleccionan (evaluar es del usuario). Sin `READY` en 8 s el fondo vuelve al placeholder. El descenso del globo es una curva ilustrativa: la interfaz lo rotula "illustrative". Falta `SET_VEHICLES` (interruptor) y probarlo en una GPU real.
 
 ## Preguntas hacia el handoff
 

@@ -65,6 +65,8 @@ interface MissionState {
   setConfig: (p: Partial<Pick<MissionState, 'startUtc' | 'durationDays' | 'stepMinutes' | 'panelAreaM2' | 'panelEfficiency'>>) => void
   evaluate: () => Promise<void>
   backToGlobe: () => void
+  /** Vuelve a la escena local del sitio ya evaluado (sin pedir nada a la API). */
+  showSite: () => void
   setStep: (i: number) => void
   setPlaying: (p: boolean) => void
 
@@ -120,6 +122,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     } catch (e) { set({ error: e as ApiError, loading: false }) }
   },
   backToGlobe: () => set({ viewMode: 'globe', playing: false }),
+  showSite: () => set((s) => (s.terrain ? { viewMode: 'site' } : {})),
   setStep: (stepIndex) => set({ stepIndex }),
   setPlaying: (playing) => set({ playing }),
 
