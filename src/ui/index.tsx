@@ -86,7 +86,7 @@ export function Button({ variant = 'secondary', icon: Icon, iconFill, children, 
 }) {
   return (
     <button {...rest} className={cx('inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-[filter,opacity] duration-200 disabled:cursor-not-allowed',
-      variant === 'primary' && 'btn-primary hover:brightness-105 disabled:opacity-40 disabled:shadow-none',
+      variant === 'primary' && (rest.disabled ? 'raised text-ink-3' : 'btn-primary hover:brightness-105'),
       variant === 'secondary' && 'raised text-ink hover:brightness-125 disabled:opacity-40',
       variant === 'ghost' && 'text-ink-2 hover:bg-white/5 hover:text-ink',
       variant === 'danger' && 'raised text-nogo hover:brightness-125', className)}>

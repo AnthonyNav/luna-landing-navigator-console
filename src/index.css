@@ -8,7 +8,7 @@
   --color-sky: #04060a;
   --color-ink: #f4f1ea;
   --color-ink-2: rgb(244 241 234 / 0.72);
-  --color-ink-3: rgb(244 241 234 / 0.52);
+  --color-ink-3: rgb(244 241 234 / 0.6);
   --color-line: rgb(255 255 255 / 0.14);
   --color-hairline: rgb(255 255 255 / 0.08);
   --color-sun: #ffc65c;
@@ -25,7 +25,7 @@
 
 :root {
   color-scheme: dark;
-  --glass-fill: rgb(16 20 28 / 0.44);
+  --glass-fill: rgb(16 20 28 / 0.5);
   --glass-fill-strong: rgb(16 20 28 / 0.66);
   --glass-blur: blur(18px) saturate(140%);
   /* Glass/Panel: bisel (luz arriba, sombra abajo), sombra de elevación y halo de retroiluminación */

@@ -1,4 +1,4 @@
-import { Globe2, Mountain, PanelRightClose, Snowflake, Sun, Zap, type LucideIcon } from 'lucide-react'
+import { Globe2, Mountain, Snowflake, Sun, Zap, type LucideIcon } from 'lucide-react'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { deg, formatHours, hoursShort, pct } from '@/core/utils/timeline'
 import { formatUtc } from '@/core/utils/time'
@@ -61,7 +61,7 @@ function Simple() {
   const h = HEADLINE[site.status as MissionStatus] ?? HEADLINE.CAUTION
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col items-start gap-2">
         <StatusChip status={site.status} />
         <h3 className="text-[22px] leading-[27px] font-bold text-balance">{h.title}</h3>
         <p className="text-[13px] leading-[19px] text-ink-2">{h.body}</p>
@@ -154,7 +154,7 @@ export function ResultsPanel() {
   const loading = useMissionStore((s) => s.loading)
   const error = useMissionStore((s) => s.error)
   return (
-    <Panel title="Results" label="Results" aside={<PanelRightClose size={16} className="text-ink-3" aria-hidden />}>
+    <Panel title="Results" label="Results">
       {loading ? <Loading />
         : error ? <ErrorNotice />
         : !evaluation ? <p className="text-[13px] leading-[19px] text-ink-2">Choose a landing site and a date, then run the simulation to see sunlight, the link to Earth and the ground.</p>

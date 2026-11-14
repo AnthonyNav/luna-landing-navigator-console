@@ -1,12 +1,28 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { HorizonPoint, TimelinePoint } from '@/types'
+
+/** Ancho real del contenedor: el SVG no se escala para no deformar los marcadores. */
+function useWidth(fallback: number) {
+  const ref = useRef<HTMLElement>(null)
+  const [w, setW] = useState(fallback)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [ref, w] as const
+}
 
 /**
  * Silueta del horizonte local (horizon_profile, 0..359°) con la posición actual del Sol y la Tierra.
  * Todo viene del backend (D-002): aquí solo se dibuja.
  */
-export function HorizonChart({ profile, point, width = 640, height = 104 }: {
-  profile: HorizonPoint[]; point?: TimelinePoint; width?: number; height?: number
+export function HorizonChart({ profile, point, height = 104 }: {
+  profile: HorizonPoint[]; point?: TimelinePoint; height?: number
 }) {
+  const [ref, width] = useWidth(640)
   const els = profile.map((p) => p.horizon_el_deg)
   const lo = Math.min(-2, ...els, point?.earth_el_deg ?? 0, point?.sun_el_deg ?? 0) - 0.5
   const hi = Math.max(4, ...els, point?.earth_el_deg ?? 0, point?.sun_el_deg ?? 0) + 0.5
@@ -23,7 +39,7 @@ export function HorizonChart({ profile, point, width = 640, height = 104 }: {
   )
   const ticks = [0, Math.ceil(lo), Math.floor(hi)].filter((v, i, a) => a.indexOf(v) === i)
   return (
-    <figure className="flex flex-col gap-1">
+    <figure ref={ref} className="flex w-full min-w-0 flex-col gap-1">
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img"
         aria-label="Local horizon profile with the current Sun and Earth positions" className="overflow-visible">
         <defs>
@@ -38,7 +54,7 @@ export function HorizonChart({ profile, point, width = 640, height = 104 }: {
         {point && body(point.sun_az_deg, point.sun_el_deg, point.sun_horizon_el_deg, '#ffc65c', 'Sun')}
         {point && body(point.earth_az_deg, point.earth_el_deg, point.earth_horizon_el_deg, '#5bbdff', 'Earth')}
       </svg>
-      <figcaption className="tnum flex justify-between font-mono text-[11px] text-ink-3" style={{ width }}>
+      <figcaption className="tnum flex justify-between font-mono text-[11px] text-ink-3">
         {['0° N', '90° E', '180° S', '270° W', '360°'].map((t) => <span key={t}>{t}</span>)}
       </figcaption>
     </figure>

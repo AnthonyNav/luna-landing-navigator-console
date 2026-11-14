@@ -53,7 +53,7 @@ function AddScenario() {
   if (full) return <p className="text-xs text-ink-3">Five scenarios is the limit. Remove one to add another.</p>
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="grid grid-cols-[1fr_128px] gap-2">
+      <div className="grid grid-cols-1 gap-2">
         <Field label="Site">
           <select aria-label="Scenario site" value={siteId} onChange={(e) => setSiteId(e.target.value)}
             className="inset-well h-10 min-w-0 rounded-xl px-2.5 text-[13px] font-medium ring-1 ring-white/10 [color-scheme:dark]">

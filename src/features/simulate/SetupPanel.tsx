@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Bookmark, Calendar, ChevronRight, Clock, MapPin, PanelLeftClose, Play, Search, Zap } from 'lucide-react'
+import { Bookmark, ChevronRight, MapPin, Play, Search, Zap } from 'lucide-react'
 import { STEP_OPTIONS, useMissionStore, type SelectedSite } from '@/core/store/useMissionStore'
 import { useHistoryStore } from '@/core/store/useHistoryStore'
 import { toUtcIso } from '@/core/utils/time'
@@ -92,9 +92,9 @@ function WindowFields({ detailed }: { detailed: boolean }) {
   const set = (d: string, t: string) => { if (d && t) setConfig({ startUtc: toUtcIso(new Date(`${d}T${t}:00Z`)) }) }
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-[1fr_104px] gap-2.5">
-        <Field label="Date"><Input icon={Calendar} type="date" value={date} onChange={(e) => set(e.target.value, time)} /></Field>
-        <Field label="Time (UTC)"><Input icon={Clock} type="time" mono value={time} onChange={(e) => set(date, e.target.value)} /></Field>
+      <div className="grid grid-cols-[1.35fr_1fr] gap-2.5">
+        <Field label="Date"><Input type="date" value={date} onChange={(e) => set(e.target.value, time)} /></Field>
+        <Field label="Time (UTC)"><Input type="time" mono value={time} onChange={(e) => set(date, e.target.value)} /></Field>
       </div>
       <Field label="Mission length" hint={detailed ? undefined : '14 days is one lunar daylight period.'}>
         <Segmented label="Mission length" value={durationDays} onChange={(v) => setConfig({ durationDays: v })}
@@ -150,7 +150,7 @@ function RunBar({ detailed }: { detailed: boolean }) {
       </div>
       {lastRunMs != null && n != null && (
         <p className={detailed ? 'tnum font-mono text-[11px] text-ink-3' : 'text-xs text-ink-3'}>
-          {detailed ? `POST /evaluate · ${(lastRunMs / 1000).toFixed(2)} s · ${n} steps` : `Last run took ${(lastRunMs / 1000).toFixed(1)} s · ${n} steps`}
+          {detailed ? `POST /evaluate · ${(lastRunMs / 1000).toFixed(2)} s · ${n} steps` : `Last run took ${lastRunMs < 100 ? 'under 0.1' : (lastRunMs / 1000).toFixed(1)} s · ${n} steps`}
         </p>
       )}
     </div>
@@ -165,7 +165,7 @@ export function SetupPanel() {
   const [mode, setMode] = useState<'catalog' | 'custom'>('catalog')
   const detailed = detail === 'detailed'
   return (
-    <Panel title="Setup" label="Setup" aside={<PanelLeftClose size={16} className="text-ink-3" aria-hidden />}>
+    <Panel title="Setup" label="Setup">
       <div className="flex flex-col gap-3">
         <SectionTitle aside={detailed && <Segmented size="sm" label="Site source" value={mode} onChange={setMode}
           options={[{ value: 'catalog', label: 'Catalog' }, { value: 'custom', label: 'Custom' }]} className="w-[140px]" />}>

@@ -85,9 +85,9 @@ export function TimelineDock() {
           </button>
           {detailed && <Segmented size="sm" label="Playback speed" value={speed} onChange={setSpeed}
             options={SPEEDS.map((s) => ({ value: s, label: `${s}×` }))} className="w-[120px]" />}
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             <span className="tnum text-sm font-bold">{detailed ? `T+${Math.round(stepIndex * hrs)} h` : `Day ${day} of ${totalDays}`}</span>
-            <span className="tnum font-mono text-[11px] text-ink-2">{formatUtc(p.timestamp_utc)}</span>
+            <span className="tnum truncate font-mono text-[11px] text-ink-2">{formatUtc(p.timestamp_utc)}</span>
           </div>
         </div>
         {detailed ? <Segmented size="sm" label="Bottom view" value={tab} onChange={setTab}
@@ -98,14 +98,18 @@ export function TimelineDock() {
             </div>}
       </div>
 
-      {tab === 'horizon' && detailed ? <HorizonChart profile={evaluation.horizon_profile} point={p} width={652} /> : (
+      {tab === 'horizon' && detailed ? <HorizonChart profile={evaluation.horizon_profile} point={p} /> : (
         <div className="relative pt-5">
-          {events.map((e) => (
-            <span key={e.label} className="absolute top-0 flex items-center gap-1 rounded-md px-1.5 py-px text-[10px] font-bold"
-              style={{ left: `calc(104px + 12px + (100% - 116px) * ${e.h / totalH})`, background: `color-mix(in srgb, ${SIGNAL[e.signal]} 18%, transparent)` }}>
-              <span className="h-2.5 w-0.5" style={{ background: SIGNAL[e.signal] }} />{e.label} {Math.round(e.h)} h
-            </span>
-          ))}
+          {events.map((e) => {
+            // En la mitad derecha la bandera crece hacia la izquierda para no salirse del dock
+            const f = Math.min(1, e.h / totalH), flip = f > 0.5
+            return (
+              <span key={e.label} className={`absolute top-0 flex items-center gap-1 rounded-md px-1.5 py-px text-[10px] font-bold whitespace-nowrap ${flip ? 'flex-row-reverse -translate-x-full' : ''}`}
+                style={{ left: `calc(104px + 12px + (100% - 116px) * ${f})`, background: `color-mix(in srgb, ${SIGNAL[e.signal]} 18%, transparent)` }}>
+                <span className="h-2.5 w-0.5" style={{ background: SIGNAL[e.signal] }} />{e.label} {Math.round(e.h)} h
+              </span>
+            )
+          })}
           <div className="grid grid-cols-[104px_1fr] items-center gap-x-3 gap-y-2">
             {rows.map((r) => (
               <div key={r.label} className="contents">
