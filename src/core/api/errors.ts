@@ -1,5 +1,5 @@
-// P-001: docs/06 documenta { error: { code, message, details } } pero contracts/openapi.json
-// solo define HTTPValidationError ({ detail }). Soportamos ambos; decidir SIEMPRE por `code`.
+// Respuesta P-001 (docs/06): el backend en vivo devuelve { detail }; el mock devuelve
+// { error: { code, message, details } }. Soportamos ambos; decidir SIEMPRE por `code`.
 export type ApiErrorCode =
   | 'ERR_INVALID_COORDINATES' | 'ERR_DATE_OUT_OF_RANGE' | 'ERR_TERRAIN_UNAVAILABLE'
   | 'ERR_UPSTREAM_SERVICE' | 'ERR_INVALID_PAYLOAD' | 'ERR_SCENARIO_LIMIT_EXCEEDED'

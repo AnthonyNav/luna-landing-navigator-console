@@ -57,10 +57,10 @@ Falta (por carril): horizon chart 2D, PSR overlay, modos de cámara, Gantt, comp
 
 ## Preguntas hacia el handoff
 
-Redactadas como `P-001`..`P-005` en `.handoff/PREGUNTAS.md` (rama `preguntas/frontend-fase-1`; ver su estado/respuestas tras `npm run sync:handoff`). Resumen de qué asumimos mientras tanto:
+`P-001`..`P-005` fueron **respondidas el 2026-11-14** (ver `.handoff/PREGUNTAS.md`, sección Respondidas). Lo acordado, ya en `docs/06` y `docs/07` del handoff:
 
-- **P-001** formato de error: el cliente soporta `error.code` y `detail` (`src/core/api/errors.ts`).
-- **P-002** URL del mock: usamos `http://localhost:3000/api/v1`.
-- **P-003** rango de latitud: no se valida en cliente.
-- **P-004** `mock/` es CommonJS: se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
-- **P-005** `openapi-typescript` exige TS 5: se ejecuta vía `npx`, no está en devDependencies.
+- **Errores:** el backend en vivo devuelve `{detail}` (FastAPI); el mock devuelve `{error:{code,...}}`. El cliente soporta ambos (`src/core/api/errors.ts`).
+- **URL del mock:** `http://localhost:3000/api/v1`.
+- **Latitud:** el backend acepta `-90..90` (Apollo vía DEM global). El mock solo acepta `-90..-80`: los sitios Apollo no se pueden probar offline hasta ampliar `mock/server.js` (pendiente de ellos).
+- **Mock CommonJS:** se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
+- **Tipos:** `openapi-typescript` se ejecuta vía `npx`, no está en devDependencies.
