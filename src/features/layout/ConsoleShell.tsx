@@ -4,7 +4,6 @@ import { useMissionStore } from '@/core/store/useMissionStore'
 import { SceneBackground } from '@/features/viewport3d/SceneBackground'
 import { Rail } from './Rail'
 import { FullscreenBar, TopBar } from './TopBar'
-import { OfflineBanner } from './OfflineBanner'
 
 export interface WorkspaceSlots { left?: ReactNode; right?: ReactNode; top?: ReactNode; bottom?: ReactNode; overlay?: ReactNode; leftWidth?: number }
 
@@ -58,7 +57,7 @@ export function ConsoleShell({ slots }: { slots: WorkspaceSlots }) {
           <div className="relative flex min-h-0 flex-1 gap-4">
             {slots.left && <div className="peek flex shrink-0 flex-col gap-3 overflow-y-auto [--from-x:calc(var(--drift)*-1)] [view-transition-name:vt-left]" style={{ width: slots.leftWidth ?? 300 }}>{slots.left}</div>}
             <div className="relative flex min-w-0 flex-1 flex-col justify-between gap-4">
-              <div className="flex flex-wrap items-start gap-2"><OfflineBanner />{slots.top}</div>
+              <div className="flex flex-wrap items-start gap-2">{slots.top}</div>
               <div className="peek flex justify-center [view-transition-name:vt-dock]">{slots.bottom}</div>
             </div>
             {slots.right && <div className="peek flex w-[300px] shrink-0 flex-col gap-3 overflow-y-auto [--from-x:var(--drift)] [view-transition-name:vt-right]">{slots.right}</div>}

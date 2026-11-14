@@ -5,6 +5,7 @@ import { API_BASE } from '@/core/api/client'
 import { Dot, Kbd, Segmented } from '@/ui'
 import { Logo } from './Rail'
 import { WORKSPACES } from './workspaces'
+import { ConnectionStatus } from './ConnectionStatus'
 
 /** Origen de datos visible siempre (principio 5 de PRODUCT.md: datos honestos). */
 export function DataSource() {
@@ -58,8 +59,8 @@ function Context() {
 export function TopBar() {
   const workspace = useMissionStore((s) => s.workspace)
   return (
-    <header className="glass condense pointer-events-auto grid h-14 [view-transition-name:vt-top] grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[18px] pr-2.5 pl-5">
-      <Context />
+    <header className="glass condense pointer-events-auto relative z-20 grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[18px] pr-2.5 pl-5 [view-transition-name:vt-top]">
+      <div className="flex min-w-0 items-center justify-between gap-3"><Context /><ConnectionStatus /></div>
       {workspace !== 'history' ? <DetailToggle /> : <span />}
       <div className="flex items-center justify-end gap-2.5"><DataSource /><FullscreenButton /></div>
     </header>
@@ -73,13 +74,16 @@ export function FullscreenBar() {
   const selected = useMissionStore((s) => s.selected)
   const { box, glider, style } = useGlider<HTMLElement>(workspace)
   return (
-    <div className="fs-bar grid grid-cols-[1fr_auto_1fr] items-start gap-3 [view-transition-name:vt-top]">
-      <div className="glass pointer-events-auto inline-flex h-11 items-center gap-3 justify-self-start rounded-full pr-4 pl-3.5">
+    <div className="fs-bar relative z-20 grid grid-cols-[1fr_auto_1fr] items-start gap-3 [view-transition-name:vt-fsbar]">
+      <div className="flex min-w-0 items-center gap-2 justify-self-start">
+      <div className="fs-dim glass pointer-events-auto inline-flex h-11 items-center gap-3 justify-self-start rounded-full pr-4 pl-3.5">
         <Logo size={22} /><span className="text-[15px] font-bold">Lunar Navigator</span>
         {selected && <><span className="h-[18px] w-px bg-line" /><MapPin size={15} className="text-ink-2" aria-hidden />
-          <span className="text-[15px] font-medium">{selected.label}</span></>}
+          <span className="truncate text-[15px] font-medium">{selected.label}</span></>}
       </div>
-      <nav ref={box} aria-label="Workspaces" className="glass pointer-events-auto relative flex gap-0.5 rounded-full p-[5px]">
+      <ConnectionStatus />
+      </div>
+      <nav ref={box} aria-label="Workspaces" className="fs-dim glass pointer-events-auto relative flex gap-0.5 rounded-full p-[5px]">
         <span ref={glider} aria-hidden className={`${GLIDER} rounded-full`} style={style} />
         {WORKSPACES.map(({ id, label, icon: Icon }) => {
           const on = id === workspace
@@ -91,7 +95,7 @@ export function FullscreenBar() {
           )
         })}
       </nav>
-      <div className="glass pointer-events-auto flex items-center gap-2 justify-self-end rounded-full p-1"><FullscreenButton /></div>
+      <div className="fs-dim glass pointer-events-auto flex items-center gap-2 justify-self-end rounded-full p-1"><FullscreenButton /></div>
     </div>
   )
 }
