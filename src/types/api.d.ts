@@ -124,6 +124,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/psr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Psrs
+         * @description Whole PSR catalog, paginated, for views of the entire pole (the globe).
+         *
+         *     `/psr/nearby` stays the call for one site; this one lists every region once.
+         */
+        get: operations["list_psrs_api_v1_psr_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ephemeris": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Moon Center Ephemeris
+         * @description Sun and Earth seen from the Moon's center in MOON_ME (sub-solar and sub-Earth points).
+         *
+         *     For drawing the sky of the whole globe before any site is evaluated (handoff P-007).
+         *     Site-local vectors stay in `/evaluate` (`sun_vector_3d`, `earth_vector_3d`).
+         */
+        get: operations["moon_center_ephemeris_api_v1_ephemeris_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -155,6 +200,12 @@ export interface components {
              * @default 4
              */
             panel_area_m2: number;
+            /**
+             * Include Timeline
+             * @description Also return each scenario's timeline (as in /evaluate)
+             * @default false
+             */
+            include_timeline: boolean;
         };
         /**
          * CompareResponse
@@ -173,6 +224,11 @@ export interface components {
             label: string;
             site: components["schemas"]["EvaluateSiteInfo"];
             summary: components["schemas"]["EvaluateSummary"];
+            /**
+             * Timeline
+             * @description Only when the request sets include_timeline
+             */
+            timeline?: components["schemas"]["TimelinePoint"][] | null;
         };
         /**
          * CompareScenario
@@ -226,6 +282,41 @@ export interface components {
             missing_symbols?: string[];
             /** Error */
             error?: string | null;
+        };
+        /**
+         * EphemerisBody
+         * @description Body seen from the Moon's center in the lunar body-fixed frame.
+         */
+        EphemerisBody: {
+            /**
+             * Direction
+             * @description Unit vector (+X lat 0 lon 0, +Z north pole)
+             */
+            direction: number[];
+            /** Sub Lat Deg */
+            sub_lat_deg: number;
+            /**
+             * Sub Lon Deg
+             * @description East longitude 0..360
+             */
+            sub_lon_deg: number;
+            /** Distance Km */
+            distance_km: number;
+        };
+        /**
+         * EphemerisResponse
+         * @description Response payload for GET /api/v1/ephemeris.
+         */
+        EphemerisResponse: {
+            /** Utc */
+            utc: string;
+            /**
+             * Frame
+             * @description SPICE frame of `direction` (MOON_ME_DE421)
+             */
+            frame: string;
+            sun: components["schemas"]["EphemerisBody"];
+            earth: components["schemas"]["EphemerisBody"];
         };
         /**
          * ErrorDetail
@@ -325,6 +416,11 @@ export interface components {
             status: "GO" | "CAUTION" | "NO-GO";
             /** Reasons */
             reasons: string[];
+            /**
+             * Checks
+             * @description Same verdict as `reasons`, as codes and values (English `message`)
+             */
+            checks?: components["schemas"]["SiteCheck"][];
         };
         /**
          * EvaluateSummary
@@ -452,6 +548,55 @@ export interface components {
             coordinates: unknown[];
         };
         /**
+         * PsrLabelPoint
+         * @description Point inside the PSR polygon (for pins and labels), in polar meters and degrees.
+         */
+        PsrLabelPoint: {
+            /** Polar X M */
+            polar_x_m: number;
+            /** Polar Y M */
+            polar_y_m: number;
+            /** Lat */
+            lat: number;
+            /** Lon */
+            lon: number;
+        };
+        /**
+         * PsrListItem
+         * @description PSR polygon for the whole-catalog listing.
+         */
+        PsrListItem: {
+            /** Gid */
+            gid: number;
+            /** Name */
+            name?: string | null;
+            /** Area Km2 */
+            area_km2?: number | null;
+            label_point: components["schemas"]["PsrLabelPoint"];
+            geometry: components["schemas"]["PsrGeoJsonGeometry"];
+        };
+        /**
+         * PsrListResponse
+         * @description Response payload for GET /api/v1/psr (paginated catalog).
+         */
+        PsrListResponse: {
+            /**
+             * Total
+             * @description PSRs matching the filter (all pages)
+             */
+            total: number;
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Count */
+            count: number;
+            /** Simplify M */
+            simplify_m: number;
+            /** Psrs */
+            psrs: components["schemas"]["PsrListItem"][];
+        };
+        /**
          * PsrNearbyItem
          * @description Permanently Shadowed Region record with simplified polar geometry.
          */
@@ -492,6 +637,36 @@ export interface components {
             polar_x_m: number;
             /** Polar Y M */
             polar_y_m: number;
+        };
+        /**
+         * SiteCheck
+         * @description One verdict criterion as data, so clients can render it in their own language.
+         */
+        SiteCheck: {
+            /**
+             * Code
+             * @description SLOPE_SAFE|SLOPE_MODERATE|SLOPE_CRITICAL|SUN_HIGH|SUN_LIMITED|SUN_CRITICAL|DTE_AVAILABLE|DTE_REDUCED|DTE_NONE
+             */
+            code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "ok" | "caution" | "nogo";
+            /** Value */
+            value: number;
+            /** Threshold */
+            threshold?: number | null;
+            /**
+             * Unit
+             * @enum {string}
+             */
+            unit: "deg" | "pct";
+            /**
+             * Message
+             * @description English sentence for display
+             */
+            message: string;
         };
         /**
          * SitesResponse
@@ -540,6 +715,16 @@ export interface components {
             elevations_m: number[];
             /** Slopes Deg */
             slopes_deg: number[];
+            /**
+             * Source
+             * @description Dataset the grid was sampled from
+             */
+            source?: ("lola_polar" | "lola_global" | "synthetic") | null;
+            /**
+             * Native Resolution M
+             * @description Native posting of that dataset; cells finer than this are interpolated
+             */
+            native_resolution_m?: number | null;
         };
         /**
          * TerrainPatchResponse
@@ -914,6 +1099,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PsrNearbyResponse"];
+                };
+            };
+            /** @description Invalid JSON or missing required payload field */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Requested resource or route not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation or domain rule violation (ERR_*) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Terrain dataset, SPICE kernel, or database unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_psrs_api_v1_psr_get: {
+        parameters: {
+            query?: {
+                /** @description Geometry simplification tolerance in meters */
+                simplify_m?: number;
+                /** @description Page size */
+                limit?: number;
+                /** @description Number of PSRs to skip (ordered by gid) */
+                offset?: number;
+                /** @description Only PSRs at least this large */
+                min_area_km2?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PsrListResponse"];
+                };
+            };
+            /** @description Invalid JSON or missing required payload field */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Requested resource or route not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation or domain rule violation (ERR_*) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Terrain dataset, SPICE kernel, or database unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    moon_center_ephemeris_api_v1_ephemeris_get: {
+        parameters: {
+            query: {
+                /** @description UTC timestamp in ISO-8601 (1900-2050) */
+                utc: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EphemerisResponse"];
                 };
             };
             /** @description Invalid JSON or missing required payload field */

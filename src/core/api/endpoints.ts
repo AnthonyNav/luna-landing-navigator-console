@@ -4,7 +4,8 @@ import type {
   PsrNearby, SitesResponse, TerrainPatch,
 } from '@/types'
 
-// Un método por endpoint de contracts/lunar-landing-api-contract.md (v1.0). No añadir otros.
+// Un método por endpoint de contracts/lunar-landing-api-contract.md que la consola usa (contrato v1.2, D-014).
+// v1.2 agrega GET /psr y GET /ephemeris; la consola todavía no los consume.
 const qs = (p: Record<string, string | number | undefined>) =>
   new URLSearchParams(Object.entries(p).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])).toString()
 

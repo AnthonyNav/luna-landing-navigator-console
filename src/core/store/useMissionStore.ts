@@ -149,6 +149,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       const comparison = await api.compare({
         scenarios: scenarios.map((s) => ({ label: s.label, lat: s.site.lat, lon: s.site.lon, start_utc: s.startUtc })),
         duration_days: durationDays, step_minutes: 120, panel_efficiency: panelEfficiency, panel_area_m2: panelAreaM2,
+        include_timeline: false, // v1.2 (D-014): la tabla solo usa los resúmenes; el timeline se pide al mostrar un escenario
       })
       set({ comparison, comparing: false })
     } catch (e) { set({ compareError: e as ApiError, comparing: false }) }
