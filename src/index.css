@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Paleta "Deep Space Mission Control" (docs/ideas/lunar-landing-ui-ux-tdd.md, no vinculante) */
+@theme {
+  --color-space: #090d16;
+  --color-surface: #111827;
+  --color-line: #1f2937;
+  --color-sun: #f59e0b;
+  --color-earth: #38bdf8;
+  --color-psr: #818cf8;
+  --color-go: #10b981;
+  --color-caution: #f59e0b;
+  --color-nogo: #ef4444;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--color-space); color: #e5e7eb; overflow: hidden; font-family: var(--font-sans); }
+.tnum { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
