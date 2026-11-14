@@ -1,4 +1,5 @@
 import { ChevronRight, Maximize, Minimize, MapPin } from 'lucide-react'
+import { GLIDER, useGlider, withViewTransition } from '@/ui/motion'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { API_BASE } from '@/core/api/client'
 import { Dot, Kbd, Segmented } from '@/ui'
@@ -23,7 +24,7 @@ export function DataSource() {
 function DetailToggle() {
   const detail = useMissionStore((s) => s.detail)
   const setDetail = useMissionStore((s) => s.setDetail)
-  return <Segmented label="Detail level" value={detail} onChange={setDetail}
+  return <Segmented label="Detail level" value={detail} onChange={(v) => withViewTransition(() => setDetail(v))}
     options={[{ value: 'simple', label: 'Simple' }, { value: 'detailed', label: 'Detailed' }]} className="w-[180px]" />
 }
 
@@ -32,7 +33,7 @@ function FullscreenButton() {
   const toggle = useMissionStore((s) => s.toggleFullscreen)
   const Icon = fullscreen ? Minimize : Maximize
   return (
-    <button onClick={toggle} className="raised inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] font-bold">
+    <button onClick={() => withViewTransition(toggle)} className="raised inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] font-bold">
       <Icon size={15} aria-hidden />{fullscreen ? 'Exit full screen' : 'Full screen'}<Kbd>F</Kbd>
     </button>
   )
@@ -57,7 +58,7 @@ function Context() {
 export function TopBar() {
   const workspace = useMissionStore((s) => s.workspace)
   return (
-    <header className="glass pointer-events-auto grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[18px] pr-2.5 pl-5">
+    <header className="glass condense pointer-events-auto grid h-14 [view-transition-name:vt-top] grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[18px] pr-2.5 pl-5">
       <Context />
       {workspace !== 'history' ? <DetailToggle /> : <span />}
       <div className="flex items-center justify-end gap-2.5"><DataSource /><FullscreenButton /></div>
@@ -70,19 +71,21 @@ export function FullscreenBar() {
   const workspace = useMissionStore((s) => s.workspace)
   const setWorkspace = useMissionStore((s) => s.setWorkspace)
   const selected = useMissionStore((s) => s.selected)
+  const { box, glider, style } = useGlider<HTMLElement>(workspace)
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 [view-transition-name:vt-top]">
       <div className="glass pointer-events-auto inline-flex h-11 items-center gap-3 justify-self-start rounded-full pr-4 pl-3.5">
         <Logo size={22} /><span className="text-[15px] font-bold">Lunar Navigator</span>
         {selected && <><span className="h-[18px] w-px bg-line" /><MapPin size={15} className="text-ink-2" aria-hidden />
           <span className="text-[15px] font-medium">{selected.label}</span></>}
       </div>
-      <nav aria-label="Workspaces" className="glass pointer-events-auto flex gap-0.5 rounded-full p-[5px]">
+      <nav ref={box} aria-label="Workspaces" className="glass pointer-events-auto relative flex gap-0.5 rounded-full p-[5px]">
+        <span ref={glider} aria-hidden className={`${GLIDER} rounded-full`} style={style} />
         {WORKSPACES.map(({ id, label, icon: Icon }) => {
           const on = id === workspace
           return (
-            <button key={id} onClick={() => setWorkspace(id)} aria-current={on ? 'page' : undefined}
-              className={`inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm ${on ? 'raised font-bold text-ink' : 'font-medium text-ink-2 hover:text-ink'}`}>
+            <button key={id} onClick={() => withViewTransition(() => setWorkspace(id))} aria-current={on ? 'page' : undefined} data-active={on}
+              className={`relative inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm transition-[color,scale] duration-200 active:scale-95 ${on ? 'font-bold text-ink' : 'font-medium text-ink-2 hover:text-ink'}`}>
               <Icon size={15} aria-hidden />{label}
             </button>
           )

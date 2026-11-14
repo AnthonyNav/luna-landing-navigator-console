@@ -2,7 +2,7 @@ import { Globe2, Mountain, Snowflake, Sun, Zap, type LucideIcon } from 'lucide-r
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { deg, formatHours, hoursShort, pct } from '@/core/utils/timeline'
 import { formatUtc } from '@/core/utils/time'
-import { Divider, IconWell, Meter, Panel, SectionTitle, Skeleton, StatusChip, type Signal } from '@/ui'
+import { Divider, Flow, IconWell, Meter, Panel, SectionTitle, Skeleton, StatusChip, type Signal } from '@/ui'
 import type { MissionStatus } from '@/types'
 
 // Encabezado en lenguaje llano por estado. No repite umbrales: esos los decide el backend.
@@ -21,7 +21,7 @@ function Countdown({ icon, signal, label, hours, until, none, note, share }: {
       <IconWell icon={icon} signal={signal} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-xs font-medium text-ink-3">{label}</span>
-        {f ? <span className="flex items-baseline gap-1.5"><span className="tnum text-xl font-bold">{f.value}</span>
+        {f ? <span className="flex items-baseline gap-1.5"><span className="tnum text-xl font-bold"><Flow text={f.value} /></span>
           <span className="text-[13px] font-medium text-ink-2">{[f.unit, until].filter(Boolean).join(' ')}</span></span>
           : <span className="text-xl font-bold">{none}</span>}
         <Meter value={share} signal={signal} label={`${label} share of the window`} />
@@ -37,7 +37,7 @@ function Fact({ icon, signal, label, value, unit, note }: { icon: LucideIcon; si
       <IconWell icon={icon} signal={signal} />
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-ink-3">{label}</span>
-        <span className="flex items-baseline gap-1.5"><span className="tnum text-xl font-bold">{value}</span><span className="text-[13px] font-medium text-ink-2">{unit}</span></span>
+        <span className="flex items-baseline gap-1.5"><span className="tnum text-xl font-bold"><Flow text={value} duration={300} /></span><span className="text-[13px] font-medium text-ink-2">{unit}</span></span>
         <span className="text-xs text-ink-2">{note}</span>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Copy, ExternalLink, Globe2, Info, Mountain, Play, Search, Sun } from 'lucide-react'
+import { withViewTransition } from '@/ui/motion'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { fmtCoord } from '@/core/utils/coordinates'
 import { deg } from '@/core/utils/timeline'
@@ -98,7 +99,7 @@ export function MissionBrief() {
       <Divider />
       <div className="flex flex-col gap-2">
         <Button variant="primary" icon={Play} iconFill disabled={loading} onClick={() => void load()}>{loaded ? 'Replay again' : 'Replay landing window'}</Button>
-        <Button icon={Copy} disabled={!loaded} onClick={() => setWorkspace('simulate')}>Open as a new simulation</Button>
+        <Button icon={Copy} disabled={!loaded} onClick={() => withViewTransition(() => setWorkspace('simulate'))}>Open as a new simulation</Button>
       </div>
       <details className="text-[11px] text-ink-3">
         <summary className="cursor-pointer">Sources</summary>

@@ -6,15 +6,17 @@ import { formatUtc } from '@/core/utils/time'
 import { Panel, SIGNAL, Segmented, type Signal } from '@/ui'
 import { HorizonChart } from './HorizonChart'
 
-const SPEEDS = [1, 4, 12] as const // pasos del timeline por tick (100 ms)
+const SPEEDS = [1, 4, 12] as const
+// Identidad de una corrida: al cambiar, las pistas se vuelven a verter
+const startUtc = (t: { timestamp_utc: string }[]) => t[0]?.timestamp_utc ?? '' // pasos del timeline por tick (100 ms)
 
-function Track({ runs, n, signal, height }: { runs: Run[]; n: number; signal: Signal; height: number }) {
+function Track({ runs, n, signal, height, delay = 0 }: { runs: Run[]; n: number; signal: Signal; height: number; delay?: number }) {
   const c = SIGNAL[signal]
   return (
     <div className="inset-well relative w-full overflow-hidden rounded-full" style={{ height }}>
       {runs.map(([s, e]) => (
-        <span key={s} className="glow absolute top-0 h-full rounded-full"
-          style={{ left: `${(s / n) * 100}%`, width: `${((e - s) / n) * 100}%`, color: c,
+        <span key={s} className="glow pour absolute top-0 h-full rounded-full"
+          style={{ animationDelay: `${delay}ms`, left: `${(s / n) * 100}%`, width: `${((e - s) / n) * 100}%`, color: c,
             background: `linear-gradient(90deg, color-mix(in srgb, ${c} 72%, transparent), ${c} 85%, color-mix(in srgb, ${c} 45%, white))` }} />
       ))}
     </div>
@@ -81,7 +83,8 @@ export function TimelineDock() {
         <div className="flex items-center gap-3">
           <button onClick={() => { if (!playing && stepIndex >= n - 1) setStep(0); setPlaying(!playing) }} aria-label={playing ? 'Pause' : 'Play'}
             className="btn-primary grid size-8 place-items-center rounded-full">
-            {playing ? <Pause size={13} fill="currentColor" aria-hidden /> : <Play size={13} fill="currentColor" aria-hidden />}
+            <span key={String(playing)} className="condense grid place-items-center">
+              {playing ? <Pause size={13} fill="currentColor" aria-hidden /> : <Play size={13} fill="currentColor" aria-hidden />}</span>
           </button>
           {detailed && <Segmented size="sm" label="Playback speed" value={speed} onChange={setSpeed}
             options={SPEEDS.map((s) => ({ value: s, label: `${s}×` }))} className="w-[120px]" />}
@@ -111,11 +114,11 @@ export function TimelineDock() {
             )
           })}
           <div className="grid grid-cols-[104px_1fr] items-center gap-x-3 gap-y-2">
-            {rows.map((r) => (
+            {rows.map((r, i) => (
               <div key={r.label} className="contents">
                 <span className="flex justify-between text-xs font-medium text-ink-2">{r.label}
                   {detailed && <span className="tnum font-mono text-[11px] text-ink-3">{r.pct.toFixed(1)}%</span>}</span>
-                <Track runs={r.runs} n={n} signal={r.signal} height={detailed ? 10 : 8} />
+                <Track key={evaluation.site.lat + startUtc(t)} runs={r.runs} n={n} signal={r.signal} height={detailed ? 10 : 8} delay={120 + i * 110} />
               </div>
             ))}
             <span />
@@ -136,7 +139,8 @@ export function TimelineDock() {
               else return
               e.preventDefault()
             }}>
-            <span className="glow absolute -top-1 bottom-0 w-0.5 -translate-x-1/2 rounded-full bg-ink text-ink" style={{ left: `${(stepIndex / (n - 1)) * 100}%` }} />
+            <span className={`glow absolute -top-1 bottom-0 w-0.5 -translate-x-1/2 rounded-full bg-ink text-ink ${playing ? 'breathe' : ''}`}
+              style={{ left: `${(stepIndex / (n - 1)) * 100}%`, transition: playing ? 'left 100ms linear' : 'left 240ms var(--ease-out)' }} />
           </div>
         </div>
       )}

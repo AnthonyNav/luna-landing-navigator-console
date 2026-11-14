@@ -32,11 +32,11 @@ function SiteSearch() {
         onChange={(e) => { setQ(e.target.value); setOpen(true) }} onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 120)} />
       {open && matches.length > 0 && (
-        <ul id="site-results" role="listbox" className="glass glass-strong absolute inset-x-0 top-12 z-20 flex flex-col gap-0.5 rounded-xl p-1.5">
+        <ul id="site-results" role="listbox" className="glass glass-strong drip absolute inset-x-0 top-12 z-20 flex flex-col gap-0.5 rounded-xl p-1.5">
           {matches.map((s) => (
             <li key={s.id} role="option" aria-selected={false}>
               <button onMouseDown={(e) => e.preventDefault()} onClick={() => { select(toSelected(s)); setQ(''); setOpen(false) }}
-                className="flex w-full flex-col items-start rounded-lg px-2.5 py-1.5 text-left hover:bg-white/8">
+                className="flex w-full flex-col items-start rounded-lg px-2.5 py-1.5 text-left transition-[background-color,translate] duration-200 hover:translate-x-0.5 hover:bg-white/8">
                 <span className="text-[13px] font-bold">{s.name}</span>
                 <span className="text-xs text-ink-3">{s.category}</span>
               </button>
@@ -52,7 +52,7 @@ function SelectedCard() {
   const selected = useMissionStore((s) => s.selected)
   if (!selected) return <p className="text-[13px] text-ink-3">No site selected yet. Pick one from the list or click the globe.</p>
   return (
-    <div className="raised flex items-start gap-3 rounded-[14px] p-3 ring-1 ring-white/15">
+    <div key={`${selected.lat},${selected.lon}`} className="raised condense flex items-start gap-3 rounded-[14px] p-3 ring-1 ring-white/15">
       <IconWell icon={MapPin} signal="ink" size={34} />
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="truncate text-[15px] font-bold">{selected.label}</span>
@@ -141,7 +141,7 @@ function RunBar({ detailed }: { detailed: boolean }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <Button variant="primary" icon={Play} iconFill className="flex-1" disabled={!selected || loading} onClick={() => void evaluate()}>
+        <Button variant="primary" icon={Play} iconFill className={loading ? 'flex-1 shimmer' : 'flex-1'} disabled={!selected || loading} onClick={() => void evaluate()}>
           {loading ? 'Calculating…' : 'Run simulation'}
         </Button>
         <IconButton icon={Bookmark} label="Save to history" disabled={!evaluation || !selected}

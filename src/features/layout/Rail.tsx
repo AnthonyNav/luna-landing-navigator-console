@@ -1,3 +1,4 @@
+import { GLIDER, useGlider, withViewTransition } from '@/ui/motion'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { WORKSPACES } from './workspaces'
 
@@ -14,15 +15,17 @@ export function Logo({ size = 26 }: { size?: number }) {
 export function Rail() {
   const workspace = useMissionStore((s) => s.workspace)
   const setWorkspace = useMissionStore((s) => s.setWorkspace)
+  const { box, glider, style } = useGlider<HTMLElement>(workspace)
   return (
-    <nav aria-label="Workspaces" className="glass pointer-events-auto flex w-[72px] flex-col items-center gap-1.5 rounded-[22px] py-3.5">
+    <nav ref={box} aria-label="Workspaces" className="glass condense pointer-events-auto relative flex w-[72px] flex-col items-center gap-1.5 rounded-[22px] py-3.5 [--from-x:calc(var(--drift)*-1)] [view-transition-name:vt-rail]">
       <span className="mb-3.5" title="Lunar Navigator"><Logo /></span>
+      <span ref={glider} aria-hidden className={`${GLIDER} rounded-[14px]`} style={style} />
       {WORKSPACES.map(({ id, label, icon: Icon }) => {
         const on = id === workspace
         return (
-          <button key={id} onClick={() => setWorkspace(id)} aria-current={on ? 'page' : undefined}
-            className={`flex w-[60px] flex-col items-center gap-1 rounded-[14px] py-2 text-[11px] transition-colors ${on ? 'raised font-bold text-ink' : 'font-medium text-ink-2 hover:text-ink'}`}>
-            <Icon size={19} aria-hidden />{label}
+          <button key={id} onClick={() => withViewTransition(() => setWorkspace(id))} aria-current={on ? 'page' : undefined} data-active={on}
+            className={`group relative flex w-[60px] flex-col items-center gap-1 rounded-[14px] py-2 text-[11px] transition-[color,scale] duration-200 active:scale-95 ${on ? 'font-bold text-ink' : 'font-medium text-ink-2 hover:text-ink'}`}>
+            <Icon size={19} aria-hidden className="transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-translate-y-0.5" />{label}
           </button>
         )
       })}

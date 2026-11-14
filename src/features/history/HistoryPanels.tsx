@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, Check, Columns2, Copy, Globe2, History as HistoryIcon, Play, Search, Star, Sun, Trash2, X } from 'lucide-react'
+import { withViewTransition } from '@/ui/motion'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { groupByDay, useHistoryStore, type HistoryRun } from '@/core/store/useHistoryStore'
 import { hoursShort, pct } from '@/core/utils/timeline'
@@ -48,7 +49,7 @@ export function HistoryList() {
       <span className="raised grid size-11 place-items-center rounded-[14px]"><HistoryIcon size={20} aria-hidden /></span>
       <h2 className="text-base font-bold">No saved runs yet</h2>
       <p className="text-[13px] text-ink-2">Run a simulation and press the bookmark to keep it here. Runs stay on this device.</p>
-      <Button variant="primary" onClick={() => setWorkspace('simulate')} className="h-10">Start a simulation</Button>
+      <Button variant="primary" onClick={() => withViewTransition(() => setWorkspace('simulate'))} className="h-10">Start a simulation</Button>
     </Panel>
   )
   return (
@@ -79,7 +80,7 @@ export function RunDetails() {
   const load = () => {
     select(r.site)
     setConfig({ startUtc: r.startUtc, durationDays: r.durationDays, stepMinutes: r.stepMinutes })
-    setWorkspace('simulate')
+    withViewTransition(() => setWorkspace('simulate'))
   }
   const s = r.summary
   return (
@@ -107,7 +108,7 @@ export function RunDetails() {
         <Button variant="primary" icon={Play} iconFill onClick={() => { load(); void evaluate() }}>Open in Simulate</Button>
         <Button icon={Copy} onClick={load} className="justify-start">Duplicate and edit</Button>
         <Button icon={Columns2} className="justify-start"
-          onClick={() => { addScenario({ label: `${r.site.label} (${r.startUtc.slice(0, 10)})`, site: r.site, startUtc: r.startUtc }); setWorkspace('compare') }}>Add to Compare</Button>
+          onClick={() => { addScenario({ label: `${r.site.label} (${r.startUtc.slice(0, 10)})`, site: r.site, startUtc: r.startUtc }); withViewTransition(() => setWorkspace('compare')) }}>Add to Compare</Button>
         <Button variant="danger" icon={Trash2} className="justify-start" onClick={() => { remove(r.id); pickRun(null) }}>Delete run</Button>
       </div>
     </Panel>
