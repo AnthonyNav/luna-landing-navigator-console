@@ -11,7 +11,9 @@ import { ConnectionStatus } from './ConnectionStatus'
 export function DataSource() {
   const health = useMissionStore((s) => s.health)
   const error = useMissionStore((s) => s.error)
-  const isMock = /localhost:3000|127\.0\.0\.1:3000/.test(API_BASE)
+  // El contrato exige `engine` en /health; el mock no lo envía porque no tiene motor de efemérides.
+  // Se detecta por la respuesta, no por el puerto: el mock puede correr en cualquiera.
+  const isMock = !!health && !(health as Partial<typeof health>).engine
   const offline = error?.code === 'ERR_NETWORK' || (!health && !!error)
   const [label, signal] = offline ? ['Offline', 'nogo'] as const : !health ? ['Connecting', 'ink'] as const
     : isMock ? ['Sample data', 'caution'] as const : health.status === 'ok' ? ['Live data', 'go'] as const : ['Degraded', 'caution'] as const

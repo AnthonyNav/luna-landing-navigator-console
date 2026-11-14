@@ -60,15 +60,15 @@ Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala
 ## Estado
 
 Fase 1 de pantallas (rama `feat/consola-glass`): cascarón con render de fondo y paneles glass, Simulate (Simple/Detailed), Compare, History (localStorage), Missions (alunizajes reales con fuentes citadas), estados de carga/error/offline y pantalla completa.
-Fondo (handoff `docs/11`, P-006 aceptada): `viewMode` `globe` sin sitio evaluado y `site` tras evaluar; un solo render montado. El iframe del globo se monta si existe `VITE_GLOBE_URL`; si no, placeholder.
-Falta: fase 2 del globo (`useGlobeBridge` + `globeProtocol.ts`, timeout de `READY`), capa PSR y modos de cámara en la escena local, timelines por escenario en Compare (el contrato de `/compare` solo trae resúmenes), video y AI disclosure.
+Fondo (handoff `docs/11`, D-013): `viewMode` `globe` sin sitio evaluado y `site` tras evaluar; un solo render montado. El iframe del globo se monta si existe `VITE_GLOBE_URL`; si no, placeholder.
+Falta: puente con el globo (`useGlobeBridge` + `globeProtocol.ts`, timeout de `READY`). El globo ya tiene fases 2 y 3, así que el puente debe enviar también `SET_EARTH_LOCAL`, `SET_PSR` y, con un interruptor, `SET_VEHICLES` (mensajes y reglas de rotulado en `docs/11` §3, §6 y §6b). También faltan la capa PSR y los modos de cámara en la escena local, timelines por escenario en Compare (el contrato de `/compare` solo trae resúmenes), video y AI disclosure.
 
 ## Preguntas hacia el handoff
 
 `P-001`..`P-005` fueron **respondidas el 2026-11-14** (ver `.handoff/PREGUNTAS.md`, sección Respondidas). Lo acordado, ya en `docs/06` y `docs/07` del handoff:
 
-- **Errores:** el backend en vivo devuelve `{detail}` (FastAPI); el mock devuelve `{error:{code,...}}`. El cliente soporta ambos (`src/core/api/errors.ts`).
+- **Errores (contrato v1.1, D-010):** backend en vivo y mock responden `ErrorResponse` `{error:{code,message,details}}` (más `detail` opcional), con `ERR_NOT_FOUND` para rutas inexistentes. El cliente conserva el respaldo `{detail}` solo para el backend oficial, que aún no cumple `P-001` (`src/core/api/errors.ts`).
 - **URL del mock:** `http://localhost:3000/api/v1`.
-- **Latitud:** el backend acepta `-90..90` (Apollo vía DEM global). El mock solo acepta `-90..-80`: los sitios Apollo no se pueden probar offline hasta ampliar `mock/server.js` (pendiente de ellos).
+- **Latitud:** backend y mock aceptan `-90..90` y fechas `1900..2050`. El mock sirve 8 sitios (5 polares + Apollo 11, 15 y 17), así que Missions ya se prueba offline.
 - **Mock CommonJS:** se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
 - **Tipos:** `openapi-typescript` se ejecuta vía `npx`, no está en devDependencies.
