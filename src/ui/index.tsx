@@ -2,14 +2,12 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 import { AlertTriangle, Check, X, type LucideIcon } from 'lucide-react'
 import type { MissionStatus } from '@/types'
+import { SIGNAL, type Signal } from './signal'
+
+export { SIGNAL, type Signal }
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ')
 
-export const SIGNAL = {
-  sun: 'var(--color-sun)', earth: 'var(--color-earth)', psr: 'var(--color-psr)', go: 'var(--color-go)',
-  caution: 'var(--color-caution)', nogo: 'var(--color-nogo)', ink: 'var(--color-ink)', regolith: 'var(--color-regolith)',
-} as const
-export type Signal = keyof typeof SIGNAL
 
 export function Panel({ title, aside, children, className, as: Tag = 'section', label }: {
   title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string; as?: 'section' | 'aside' | 'div'; label?: string
