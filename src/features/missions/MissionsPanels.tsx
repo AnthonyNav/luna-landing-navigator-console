@@ -24,7 +24,7 @@ export function MissionsList() {
   const list = useMemo(() => MISSIONS.filter((m) => (region === 'all' || m.region === region)
     && (!q || `${m.name} ${m.operator}`.toLowerCase().includes(q.toLowerCase()))), [q, region])
   return (
-    <Panel label="Missions" className="h-full">
+    <Panel label="Missions" peek="Recreate a mission" peekAside={`${MISSIONS.length} landings`} className="h-full">
       <div className="flex flex-col gap-1"><h2 className="text-base font-bold">Recreate a mission</h2>
         <p className="text-xs text-ink-2">Load a real landing and replay its light and Earth view.</p></div>
       <Input icon={Search} placeholder="Search missions or agencies" aria-label="Search missions" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -76,7 +76,7 @@ export function MissionBrief() {
     await evaluate()
   }
   return (
-    <Panel label="Mission brief">
+    <Panel label="Mission brief" peek={m.name} peekAside={<span className="tnum font-mono">{m.touchdownUtc.slice(0, 10)}</span>}>
       <div className="flex items-center gap-3"><Monogram m={m} />
         <div className="flex flex-col"><h2 className="text-lg font-bold">{m.name}</h2><span className="text-xs text-ink-2">{m.operator}</span></div></div>
       <dl className="flex flex-col gap-1 text-xs">

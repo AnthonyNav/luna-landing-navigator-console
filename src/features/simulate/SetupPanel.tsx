@@ -165,7 +165,7 @@ export function SetupPanel() {
   const [mode, setMode] = useState<'catalog' | 'custom'>('catalog')
   const detailed = detail === 'detailed'
   return (
-    <Panel title="Setup" label="Setup">
+    <Panel title="Setup" label="Setup" peekAside={selected ? <span className="truncate">{selected.label}</span> : 'No site'}>
       <div className="flex flex-col gap-3">
         <SectionTitle aside={detailed && <Segmented size="sm" label="Site source" value={mode} onChange={setMode}
           options={[{ value: 'catalog', label: 'Catalog' }, { value: 'custom', label: 'Custom' }]} className="w-[140px]" />}>

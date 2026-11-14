@@ -219,39 +219,66 @@
 @keyframes vt-in { from { opacity: 0; filter: blur(var(--soften)); } }
 
 /*
- * Pantalla completa: cada panel queda como una tira de vidrio con su cabecera y se despliega
- * al pasar el puntero o al recibir foco (teclado). En pantallas táctiles no se pliega.
- * `interpolate-size` permite animar hasta height:auto; donde no existe, el cambio es directo.
+ * Pantalla completa: cada panel se pliega en una tira uniforme (52 × 300 px) que muestra su
+ * `.peek-head` (título + resumen, lo pinta <Panel>) y se despliega al pasar el puntero o al recibir
+ * foco de teclado. En pantallas táctiles no se pliega. `interpolate-size` anima hasta height:auto;
+ * donde no existe, el cambio es directo.
+ * Los paneles con `data-peek="inline"` (el timeline) no usan tira: su primera fila ya es el resumen.
  */
+.peek-head { display: none; }
 @media (hover: hover) {
   [data-fullscreen] .peek > .glass {
     interpolate-size: allow-keywords;
-    height: var(--peek-h, 62px);
+    height: var(--peek-h, 52px);
+    width: min(100%, 300px);
     overflow: clip;
-    transition: height 560ms var(--ease-out), --lo 500ms var(--ease-out), --lx 220ms var(--ease-out), --ly 220ms var(--ease-out);
+    /* Tira plegada: relieve corto, sin la sombra larga ni el halo del panel (dejaban una mancha debajo) */
+    box-shadow: var(--shadow-raised), 0 0 18px rgb(158 196 255 / 0.1);
+    transition: height 560ms var(--ease-out), width 480ms var(--ease-out), box-shadow 400ms var(--ease-out),
+      --lo 500ms var(--ease-out), --lx 220ms var(--ease-out), --ly 220ms var(--ease-out);
   }
-  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) { height: auto; overflow-y: auto; }
+  [data-fullscreen] .peek > .glass[data-peek="inline"] { width: 100%; }
+  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) {
+    height: auto;
+    width: 100%;
+    overflow-y: auto;
+    box-shadow: var(--shadow-panel);
+  }
+  /* Paneles que ocupan todo el hueco (History, Missions) vuelven a su alto completo */
+  [data-fullscreen] .peek > .glass.h-full:is(:hover, :focus-within) { height: 100%; }
   [data-fullscreen] .peek > .glass > * { animation: none; }
-  [data-fullscreen] .peek > .glass > :not(:first-child) {
+  /* Mientras está plegado nada se encoge: el contenido se recorta en vez de aplastarse */
+  [data-fullscreen] .peek > .glass:not(:hover, :focus-within) > * { flex-shrink: 0; }
+
+  /* Contenido real: oculto en la tira, aparece cuando el vidrio ya está creciendo */
+  [data-fullscreen] .peek > .glass:not([data-peek="inline"]) > :not(.peek-head),
+  [data-fullscreen] .peek > .glass[data-peek="inline"] > :not(:first-child) {
     opacity: 0;
     translate: 0 calc(var(--rise) * -0.5);
     transition: opacity 160ms ease-in, translate 160ms ease-in;
   }
-  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) > :not(:first-child) {
+  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) > :not(.peek-head) {
     opacity: 1;
     translate: none;
     transition: opacity 320ms var(--ease-out) 120ms, translate 420ms var(--ease-out) 120ms;
   }
-  /* La barra superior se atenúa hasta que se usa */
-  [data-fullscreen] .fs-bar > * { opacity: 0.55; transition: opacity 300ms var(--ease-out); }
-  [data-fullscreen] .fs-bar > :is(:hover, :focus-within) { opacity: 1; }
-}
+  /* Cabecera de la tira: ocupa exactamente la tira y se desvanece al desplegar */
+  [data-fullscreen] .peek > .glass > .peek-head {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 18px;
+    transition: opacity 260ms var(--ease-out) 80ms;
+  }
+  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) > .peek-head { opacity: 0; pointer-events: none; transition-delay: 0ms; }
 
-/* Resumen que solo existe en la tira plegada (ej. el estado GO en la cabecera de Results) */
-.peek-only { display: none; }
-@media (hover: hover) {
-  [data-fullscreen] .peek-only { display: contents; }
-  [data-fullscreen] .peek > .glass:is(:hover, :focus-within) .peek-only { display: none; }
+  /* La barra superior se atenúa hasta que se usa */
+  /* (el aviso de conexión no se atenúa: es justo lo que hay que ver) */
+  [data-fullscreen] .fs-dim { opacity: 0.55; transition: opacity 300ms var(--ease-out); }
+  [data-fullscreen] .fs-dim:is(:hover, :focus-within) { opacity: 1; }
 }
 
 /* Reduced motion: sin desplazamientos, resortes ni desenfoques; se conservan los fundidos de estado */

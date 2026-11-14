@@ -45,7 +45,7 @@ export function HistoryList() {
     (filter === 'all' || (filter === 'starred' ? r.starred : r.status === filter))
     && (!q || `${r.site.label} ${r.note} ${r.startUtc}`.toLowerCase().includes(q.toLowerCase())))), [runs, q, filter])
   if (runs.length === 0) return (
-    <Panel label="History" className="items-center py-7 text-center">
+    <Panel label="History" peekAside="No saved runs" className="items-center py-7 text-center">
       <span className="raised grid size-11 place-items-center rounded-[14px]"><HistoryIcon size={20} aria-hidden /></span>
       <h2 className="text-base font-bold">No saved runs yet</h2>
       <p className="text-[13px] text-ink-2">Run a simulation and press the bookmark to keep it here. Runs stay on this device.</p>
@@ -53,7 +53,8 @@ export function HistoryList() {
     </Panel>
   )
   return (
-    <Panel label="History" title="History" aside={<span className="text-xs text-ink-3">{runs.length} runs</span>} className="h-full">
+    <Panel label="History" title="History" aside={<span className="text-xs text-ink-3">{runs.length} runs</span>}
+      peekAside={`${runs.length} ${runs.length === 1 ? 'run' : 'runs'}`} className="h-full">
       <Input icon={Search} placeholder="Search by site, date or note" aria-label="Search history" value={q} onChange={(e) => setQ(e.target.value)} />
       <Segmented size="sm" label="Filter runs" value={filter} onChange={setFilter}
         options={[{ value: 'all', label: 'All' }, { value: 'starred', label: 'Starred' }, { value: 'GO', label: 'GO' }, { value: 'NO-GO', label: 'NO-GO' }]} />
@@ -76,7 +77,7 @@ export function RunDetails() {
   const { remove, setNote, toggleStar } = useHistoryStore()
   const { pickedRun, pickRun, select, setConfig, evaluate, setWorkspace, addScenario } = useMissionStore()
   const r = runs.find((x) => x.id === pickedRun)
-  if (!r) return runs.length ? <Panel label="Run details"><p className="text-[13px] text-ink-2">Pick a run to see its summary.</p></Panel> : null
+  if (!r) return runs.length ? <Panel label="Run details" peekAside="Pick a run"><p className="text-[13px] text-ink-2">Pick a run to see its summary.</p></Panel> : null
   const load = () => {
     select(r.site)
     setConfig({ startUtc: r.startUtc, durationDays: r.durationDays, stepMinutes: r.stepMinutes })

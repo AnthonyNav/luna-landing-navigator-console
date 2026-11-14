@@ -76,7 +76,8 @@ export function ScenariosPanel() {
   const bestI = best ? comparison!.results.indexOf(best) : -1
   return (
     <Panel title={<span className="flex items-baseline gap-2"><h2 className="text-base font-bold">Scenarios</h2>
-      <span className="text-xs text-ink-3">{scenarios.length} of {MAX_SCENARIOS}</span></span>} label="Scenarios">
+      <span className="text-xs text-ink-3">{scenarios.length} of {MAX_SCENARIOS}</span></span>} label="Scenarios"
+      peekAside={`${scenarios.length} of ${MAX_SCENARIOS}`}>
       {scenarios.length > 0 && <ol className="flex flex-col gap-2">{scenarios.map((s, i) => <ScenarioRow key={s.key} s={s} i={i} />)}</ol>}
       <AddScenario />
       {scenarios.length < 2 && <p className="text-xs text-ink-3">Tip: add the same site twice with different dates to see the cost of a launch slip.</p>}
@@ -119,7 +120,8 @@ export function CompareMatrix() {
   if (scenarios.length < 2 && !comparison) return null
   const results = comparison?.results ?? []
   return (
-    <Panel label="Side by side" className="absolute top-0 right-0 max-h-[calc(100%-180px)] w-[min(680px,100%)] gap-0 overflow-y-auto [--peek-h:80px]">
+    <Panel label="Side by side" peekAside={comparing ? 'Comparing…' : `${scenarios.length} scenarios`}
+      className="absolute top-0 right-0 max-h-[calc(100%-180px)] w-[min(680px,100%)] gap-0 overflow-y-auto">
       <div className="grid gap-x-4" style={{ gridTemplateColumns: `128px repeat(${scenarios.length}, minmax(0, 1fr))` }}>
         <div className="flex flex-col pb-3"><h2 className="text-[15px] font-bold">Side by side</h2><span className="text-[11px] text-ink-3">From POST /compare</span></div>
         {scenarios.map((s, i) => (

@@ -11,11 +11,25 @@ export { Flow } from './Flow'
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ')
 
 
-export function Panel({ title, aside, children, className, as: Tag = 'section', label }: {
+/**
+ * Panel de vidrio. En pantalla completa se pliega en una tira con `peek` (título; por defecto el
+ * título o el label) y `peekAside` (resumen corto). `peek="inline"`: sin tira, se ve su primera fila.
+ */
+export function Panel({ title, aside, children, className, as: Tag = 'section', label, peek, peekAside }: {
   title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string; as?: 'section' | 'aside' | 'div'; label?: string
+  peek?: string | 'inline'; peekAside?: ReactNode
 }) {
+  const strip = peek === 'inline' ? null : (peek ?? (typeof title === 'string' ? title : label))
   return (
-    <Tag aria-label={label} className={cx('glass condense surface-in pointer-events-auto flex flex-col gap-4 rounded-[20px] p-[18px]', className)}>
+    <Tag aria-label={label} data-peek={peek === 'inline' ? 'inline' : undefined}
+      className={cx('glass condense surface-in pointer-events-auto flex flex-col gap-4 rounded-[20px] p-[18px]', className)}>
+      {strip && (
+        <div className="peek-head" aria-hidden>
+          <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{strip}</span>
+          {peekAside && <span className="flex min-w-0 shrink items-center justify-end gap-2 text-xs text-ink-2">
+            {typeof peekAside === 'string' ? <span className="truncate">{peekAside}</span> : peekAside}</span>}
+        </div>
+      )}
       {(title || aside) && (
         <header className="flex items-center justify-between gap-3">
           {typeof title === 'string' ? <h2 className="text-base font-bold">{title}</h2> : title}
