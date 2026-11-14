@@ -10,3 +10,7 @@ export const isAboveHorizon = (elDeg: number, azDeg: number, horizon: { horizon_
   elDeg > horizon[Math.round(azDeg) % 360].horizon_el_deg
 
 export const pointAt = (timeline: TimelinePoint[], i: number): TimelinePoint | undefined => timeline[i]
+
+/** "89.66° S  222.70° E" (longitud normalizada a 0..360 Este, convención del contrato). */
+export const fmtCoord = (lat: number, lon: number) =>
+  `${Math.abs(lat).toFixed(2)}° ${lat < 0 ? 'S' : 'N'}  ${(((lon % 360) + 360) % 360).toFixed(2)}° E`

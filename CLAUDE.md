@@ -42,18 +42,26 @@ Mock vs. backend en vivo: cambia solo `VITE_API_BASE_URL` (ver `.env.example`; U
 ## Estructura (carriles para trabajar en paralelo sin pisarse)
 
 ```
-src/core/{api,store,utils}   Carril 1: cliente HTTP, store Zustand (3 velocidades), utilidades
-src/features/layout|timeline Carril 1: cascarón, navbar, scrubber, (Gantt pendiente)
-src/features/sidebar|comparator  Carril 2: panel de control y comparador (/compare)
-src/features/viewport3d      Carril 3: escena Three.js (terreno, Sol/Tierra, PSR, cámaras)
+src/core/{api,store,utils}   Carril 1: cliente HTTP, stores Zustand (misión + historial en localStorage), utilidades puras
+src/core/config.ts           URLs por entorno (VITE_GLOBE_URL)
+src/ui/                      Primitivas glass compartidas (Panel, Segmented, Input, Button, StatusChip, Meter…)
+src/features/layout          Carril 1: cascarón (render de fondo + paneles flotantes), rail, top bar, pantalla completa (F)
+src/features/timeline        Carril 1: dock del timeline (pistas Gantt, scrubber) y horizonte 360°
+src/features/simulate        Carril 2: Setup y Results (Simple / Detailed)
+src/features/comparator      Carril 2: escenarios A–E y matriz (POST /compare)
+src/features/history|missions  Carril 2: historial local y recrear misiones reales
+src/features/viewport3d      Carril 3: fondo (SceneBackground), hueco del globo (GlobeFrame), escena local Three.js
 src/types/                   api.d.ts (generado) + index.ts (alias legibles)
 ```
+Diseño: Figma de `.handoff/docs/ideas/console-ui-figma.md`. Tokens en `src/index.css` (`@theme` + utilidades `glass`, `raised`, `inset-well`, `btn-primary`, `glow`). Textos de interfaz en inglés.
+
 Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala aquí).
 
-## Estado (fase 1: front mockeado)
+## Estado
 
-Hecho: scaffold, tipos generados, cliente API con manejo de errores, store, shell 30/70 + timeline, selector de sitio, config de fecha, veredicto, KPIs, malla de terreno y luces Sol/Tierra básicas; verificado contra el mock (mismos campos que `openapi.json`).
-Falta (por carril): integrar el globo lunar por iframe (D-011; el origen de la consola debe estar en los orígenes permitidos del globo), horizon chart 2D, PSR overlay, modos de cámara, Gantt, comparador, toggles de capas, optimizar "solo cambio de fecha → solo /evaluate", i18n, video y AI disclosure.
+Fase 1 de pantallas (rama `feat/consola-glass`): cascarón con render de fondo y paneles glass, Simulate (Simple/Detailed), Compare, History (localStorage), Missions (alunizajes reales con fuentes citadas), estados de carga/error/offline y pantalla completa.
+Fondo (handoff `docs/11`, P-006 aceptada): `viewMode` `globe` sin sitio evaluado y `site` tras evaluar; un solo render montado. El iframe del globo se monta si existe `VITE_GLOBE_URL`; si no, placeholder.
+Falta: fase 2 del globo (`useGlobeBridge` + `globeProtocol.ts`, timeout de `READY`), capa PSR y modos de cámara en la escena local, timelines por escenario en Compare (el contrato de `/compare` solo trae resúmenes), video y AI disclosure.
 
 ## Preguntas hacia el handoff
 
