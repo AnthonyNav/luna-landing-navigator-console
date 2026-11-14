@@ -232,6 +232,9 @@
     height: var(--peek-h, 52px);
     width: min(100%, 300px);
     overflow: clip;
+    /* Sin esto, el min-height:auto del item flex (con overflow:clip no es scroll container) vale el alto
+       del contenido mientras la altura interpola desde auto: el cierre se quedaba congelado y saltaba al final */
+    min-height: 0;
     /* Tira plegada: relieve corto, sin la sombra larga ni el halo del panel (dejaban una mancha debajo) */
     box-shadow: var(--shadow-raised), 0 0 18px rgb(158 196 255 / 0.1);
     transition: height 560ms var(--ease-out), width 480ms var(--ease-out), box-shadow 400ms var(--ease-out),
