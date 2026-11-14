@@ -55,10 +55,12 @@ Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala
 Hecho: scaffold, tipos generados, cliente API con manejo de errores, store, shell 30/70 + timeline, selector de sitio, config de fecha, veredicto, KPIs, malla de terreno y luces Sol/Tierra básicas; verificado contra el mock (mismos campos que `openapi.json`).
 Falta (por carril): horizon chart 2D, PSR overlay, modos de cámara, Gantt, comparador, toggles de capas, optimizar "solo cambio de fecha → solo /evaluate", i18n, video y AI disclosure.
 
-## Preguntas pendientes hacia el handoff (aún no subidas a `PREGUNTAS.md`)
+## Preguntas hacia el handoff
 
-- **P-A · Formato de error:** `docs/06` documenta `{error:{code,message,details}}` (el mock lo cumple) pero `contracts/openapi.json` solo define `HTTPValidationError` (`{detail}`), y `FRONTEND_API_GUIDE.md` lee `detail`. El cliente soporta ambos. ¿Qué devuelve el backend en vivo?
-- **P-B · URL base del mock:** `docs/07` da `http://localhost:3000` para `VITE_API_BASE_URL`, pero el mock sirve `/api/v1/*`; usamos `http://localhost:3000/api/v1`.
-- **P-C · Rango de latitud:** `docs/06` limita a `[-90,-80]`; contrato/guía aceptan `-90..90` (sitios Apollo). El mock rechaza fuera de `[-90,-80]`.
-- **P-D · Estado de `mock/`:** `handoff-api-frontend/HANDOFF.md` dice "no iniciado", el README dice listo (funciona). Además `mock/server.js` es CommonJS: aquí se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
-- **P-E:** `openapi-typescript@7` exige TypeScript 5 y el scaffold trae 7: se ejecuta vía `npx` (no está en devDependencies).
+Redactadas como `P-001`..`P-005` en `.handoff/PREGUNTAS.md` (rama `preguntas/frontend-fase-1`; ver su estado/respuestas tras `npm run sync:handoff`). Resumen de qué asumimos mientras tanto:
+
+- **P-001** formato de error: el cliente soporta `error.code` y `detail` (`src/core/api/errors.ts`).
+- **P-002** URL del mock: usamos `http://localhost:3000/api/v1`.
+- **P-003** rango de latitud: no se valida en cliente.
+- **P-004** `mock/` es CommonJS: se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
+- **P-005** `openapi-typescript` exige TS 5: se ejecuta vía `npx`, no está en devDependencies.
