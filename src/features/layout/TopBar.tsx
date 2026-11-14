@@ -73,7 +73,7 @@ export function FullscreenBar() {
   const selected = useMissionStore((s) => s.selected)
   const { box, glider, style } = useGlider<HTMLElement>(workspace)
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 [view-transition-name:vt-top]">
+    <div className="fs-bar grid grid-cols-[1fr_auto_1fr] items-start gap-3 [view-transition-name:vt-top]">
       <div className="glass pointer-events-auto inline-flex h-11 items-center gap-3 justify-self-start rounded-full pr-4 pl-3.5">
         <Logo size={22} /><span className="text-[15px] font-bold">Lunar Navigator</span>
         {selected && <><span className="h-[18px] w-px bg-line" /><MapPin size={15} className="text-ink-2" aria-hidden />

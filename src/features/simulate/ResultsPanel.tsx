@@ -154,7 +154,7 @@ export function ResultsPanel() {
   const loading = useMissionStore((s) => s.loading)
   const error = useMissionStore((s) => s.error)
   return (
-    <Panel title="Results" label="Results">
+    <Panel title="Results" label="Results" aside={evaluation && !loading && <span className="peek-only"><StatusChip small status={evaluation.site.status} /></span>}>
       {loading ? <Loading />
         : error ? <ErrorNotice />
         : !evaluation ? <p className="text-[13px] leading-[19px] text-ink-2">Choose a landing site and a date, then run the simulation to see sunlight, the link to Earth and the ground.</p>

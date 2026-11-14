@@ -78,7 +78,7 @@ export function TimelineDock() {
   ].filter(Boolean) as { label: string; h: number; signal: Signal }[] : []
 
   return (
-    <Panel label="Timeline" className="w-full max-w-[688px] gap-2.5 px-4 py-3">
+    <Panel label="Timeline" className="w-full max-w-[688px] gap-2.5 px-4 py-3 [--peek-h:58px]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button onClick={() => { if (!playing && stepIndex >= n - 1) setStep(0); setPlaying(!playing) }} aria-label={playing ? 'Pause' : 'Play'}

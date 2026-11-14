@@ -119,7 +119,7 @@ export function CompareMatrix() {
   if (scenarios.length < 2 && !comparison) return null
   const results = comparison?.results ?? []
   return (
-    <Panel label="Side by side" className="absolute top-0 right-0 max-h-[calc(100%-180px)] w-[min(680px,100%)] gap-0 overflow-y-auto">
+    <Panel label="Side by side" className="absolute top-0 right-0 max-h-[calc(100%-180px)] w-[min(680px,100%)] gap-0 overflow-y-auto [--peek-h:80px]">
       <div className="grid gap-x-4" style={{ gridTemplateColumns: `128px repeat(${scenarios.length}, minmax(0, 1fr))` }}>
         <div className="flex flex-col pb-3"><h2 className="text-[15px] font-bold">Side by side</h2><span className="text-[11px] text-ink-3">From POST /compare</span></div>
         {scenarios.map((s, i) => (
