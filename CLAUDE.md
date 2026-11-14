@@ -11,7 +11,7 @@ Este repo solo contiene código del cliente. Trabajamos dos personas: respeta lo
 3. Revisa `.handoff/PREGUNTAS.md` (respuestas nuevas) y el `HANDOFF.md` de la iniciativa en `.handoff/contexto-sesiones/iniciativas/`.
 4. Al terminar la revisión: `echo <hash> > .handoff-last-sync` y commitea.
 
-Lectura base del handoff: `AGENTS.md`, `COMO-USAR-ESTE-REPO.md`, `contracts/lunar-landing-api-contract.md`, `FRONTEND_API_GUIDE.md`, `docs/02`, `05`, `06`, `07`, `09`. `docs/ideas/` es **no vinculante** (de ahí sale la estructura de carriles y la paleta).
+Lectura base del handoff: `AGENTS.md`, `COMO-USAR-ESTE-REPO.md`, `contracts/lunar-landing-api-contract.md`, `FRONTEND_API_GUIDE.md`, `docs/02`, `05`, `06`, `07`, `09`. Para la integración del globo lunar (D-011): `.handoff/contexto-sesiones/_compartido/lunar-globe-renderer.md` y el `README.md` de su repo (`luna-render-nasa-space-challenge`, protocolo `postMessage` — fuente única). `docs/ideas/` es **no vinculante** (de ahí sale la estructura de carriles y la paleta).
 
 ## Reglas que no se rompen (resumen; la fuente es el handoff)
 
@@ -53,7 +53,7 @@ Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala
 ## Estado (fase 1: front mockeado)
 
 Hecho: scaffold, tipos generados, cliente API con manejo de errores, store, shell 30/70 + timeline, selector de sitio, config de fecha, veredicto, KPIs, malla de terreno y luces Sol/Tierra básicas; verificado contra el mock (mismos campos que `openapi.json`).
-Falta (por carril): horizon chart 2D, PSR overlay, modos de cámara, Gantt, comparador, toggles de capas, optimizar "solo cambio de fecha → solo /evaluate", i18n, video y AI disclosure.
+Falta (por carril): integrar el globo lunar por iframe (D-011; el origen de la consola debe estar en los orígenes permitidos del globo), horizon chart 2D, PSR overlay, modos de cámara, Gantt, comparador, toggles de capas, optimizar "solo cambio de fecha → solo /evaluate", i18n, video y AI disclosure.
 
 ## Preguntas hacia el handoff
 
