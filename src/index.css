@@ -45,20 +45,26 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html, body, #root { height: 100%; }
-body {
-  margin: 0;
-  overflow: hidden;
-  background: var(--color-sky);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+/*
+ * Base en @layer base: en Tailwind v4 cualquier regla SIN capa gana a las utilidades.
+ * Fuera de la capa, `button { color: inherit }` anulaba text-*, font-* y el color del botón primario.
+ * El preflight ya hereda font/color en controles, así que no se repite aquí.
+ */
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: var(--color-sky);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgb(255 198 92 / 0.35); color: var(--color-ink); }
+  :focus-visible { outline: 2px solid var(--color-earth); outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.18) transparent; }
+  input::placeholder { color: var(--color-ink-3); }
 }
-::selection { background: rgb(255 198 92 / 0.35); color: var(--color-ink); }
-:focus-visible { outline: 2px solid var(--color-earth); outline-offset: 2px; border-radius: 10px; }
-* { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.18) transparent; }
-input, button, select { font: inherit; color: inherit; }
-input::placeholder { color: var(--color-ink-3); }
 
 /* Números que cambian mientras se mueve el slider: sin "jitter" */
 @utility tnum { font-variant-numeric: tabular-nums; }
