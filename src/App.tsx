@@ -1,20 +1,22 @@
 import { useEffect } from 'react'
-import { useMissionStore } from '@/core/store/useMissionStore'
+import { useMissionStore, type Workspace } from '@/core/store/useMissionStore'
 import { ConsoleShell, type WorkspaceSlots } from '@/features/layout/ConsoleShell'
-import { Sidebar } from '@/features/sidebar/Sidebar'
-import { TimelineScrubber } from '@/features/timeline/TimelineScrubber'
-import { Panel } from '@/ui'
+import { SetupPanel } from '@/features/simulate/SetupPanel'
+import { ResultsPanel } from '@/features/simulate/ResultsPanel'
+import { SceneControls } from '@/features/simulate/SceneControls'
+import { TimelineDock } from '@/features/timeline/TimelineDock'
 
-function useSlots(): WorkspaceSlots {
-  // Cada workspace decide qué va en cada hueco del cascarón.
-  return {
-    left: <Panel title="Setup"><Sidebar /></Panel>,
-    bottom: <Panel className="w-full max-w-[688px]"><TimelineScrubber /></Panel>,
-  }
+// Cada workspace decide qué va en cada hueco del cascarón.
+const SLOTS: Record<Workspace, () => WorkspaceSlots> = {
+  simulate: () => ({ left: <SetupPanel />, right: <ResultsPanel />, top: <SceneControls />, bottom: <TimelineDock /> }),
+  compare: () => ({ top: <SceneControls />, bottom: <TimelineDock /> }),
+  history: () => ({}),
+  missions: () => ({}),
 }
 
 export default function App() {
   const init = useMissionStore((s) => s.init)
+  const workspace = useMissionStore((s) => s.workspace)
   useEffect(() => { void init() }, [init])
-  return <ConsoleShell slots={useSlots()} />
+  return <ConsoleShell slots={SLOTS[workspace]()} />
 }
