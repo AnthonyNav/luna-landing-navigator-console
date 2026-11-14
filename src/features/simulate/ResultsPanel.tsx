@@ -174,6 +174,7 @@ function ErrorNotice() {
     ERR_INVALID_PAYLOAD: 'Some inputs are not valid. Review the setup and run again.',
     ERR_DATE_OUT_OF_RANGE: 'That date is outside the available ephemeris range.',
     ERR_TERRAIN_UNAVAILABLE: 'There is no terrain data for this spot. Try a nearby catalog site.',
+    ERR_NOT_FOUND: 'The console is calling an API route that does not exist. Check the /api/v1 base URL.',
   }
   return (
     <div role="alert" className="flex flex-col gap-1.5 rounded-xl bg-nogo/10 p-3 ring-1 ring-nogo/40">
