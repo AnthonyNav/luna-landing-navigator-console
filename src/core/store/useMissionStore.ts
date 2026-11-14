@@ -53,6 +53,10 @@ interface MissionState {
   compareError: ApiError | null
   shownScenario: string | null
 
+  // selección dentro de History y Missions
+  pickedRun: string | null
+  pickedMission: string
+
   init: () => Promise<void>
   setWorkspace: (w: Workspace) => void
   setDetail: (d: DetailLevel) => void
@@ -68,6 +72,8 @@ interface MissionState {
   removeScenario: (key: string) => void
   compare: () => Promise<void>
   showScenario: (key: string) => Promise<void>
+  pickRun: (id: string | null) => void
+  pickMission: (id: string) => void
 }
 
 let scenarioSeq = 0
@@ -82,6 +88,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   evaluation: null, terrain: null, psrs: null, loading: false, error: null, lastRunMs: null,
   stepIndex: 0, playing: false,
   scenarios: [], comparison: null, comparing: false, compareError: null, shownScenario: null,
+  pickedRun: null, pickedMission: 'im-1',
 
   init: async () => {
     try {
@@ -145,4 +152,6 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     set({ shownScenario: key, selected: sc.site, startUtc: sc.startUtc })
     await get().evaluate()
   },
+  pickRun: (pickedRun) => set({ pickedRun }),
+  pickMission: (pickedMission) => set({ pickedMission }),
 }))
