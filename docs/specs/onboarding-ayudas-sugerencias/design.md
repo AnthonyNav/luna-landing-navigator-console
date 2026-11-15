@@ -225,23 +225,20 @@ Se decide por `checks[].code` y `checks[].level`, nunca por números. Se toma el
 
 ### 3.4 Ausencia no es vacío
 
-`Countdown` muestra hoy "Earth stays in view" cuando `hours_to_next_earthset` es `null` (`ResultsPanel.tsx:72`). El ejemplo del propio contrato (§4.4) trae `earth_visible_pct: 0` con ese `null`: la consola diría que la Tierra siempre se ve justo donde nunca se ve. El texto se decide con el porcentaje que manda el backend:
+`Countdown` muestra hoy "Earth stays in view" cuando `hours_to_next_earthset` es `null` (`ResultsPanel.tsx:72`), y "No sunset in this window" cuando lo es `hours_to_next_sunset` (`:70`). Pero el Backend oficial manda ese `null` en **tres** casos distintos (verificado el 2026-11-14, ver `P-012` del handoff): el astro está visible toda la ventana, nunca se ve, o **empieza oculto** y sale más tarde. Hoy la consola dice "Earth stays in view" en Peak Near Shackleton, donde la Tierra empieza oculta y solo se ve el 5 % del tiempo.
 
-| `hours_to_next_*` | `*_visible_pct` | Sol | Tierra |
+El texto se decide en este orden, mirando primero `timeline[0]` y después el resumen. La primera fila que se cumple gana:
+
+| # | Condición | Sol | Tierra |
 | --- | --- | --- | --- |
-| número | cualquiera | "{n} hours until sunset" | "{n} hours until Earth sets" |
-| `null` | 0 | "No sunlight in this window" | "Earth never in view" |
-| `null` | mayor que 0 | "No sunset in this window" | "Earth stays in view" |
+| 1 | `*_visible_pct` es 0 | "No sunlight in this window" | "Earth never in view" |
+| 2 | Oculto en `timeline[0]`; el primer punto visible está a `h` horas del inicio | "Sunrise in {h} hours" | "Earth rises in {h} hours" |
+| 3 | Visible en `timeline[0]` y `hours_to_next_*` es un número | "{n} hours until sunset" | "{n} hours until Earth sets" |
+| 4 | Visible en `timeline[0]` y `hours_to_next_*` es `null` | "No sunset in this window" | "Earth stays in view" |
 
-**El cuerpo está oculto al inicio (A-06).** Si `timeline[0].sun_visible` (o `earth_visible`) es `false`, decir "until sunset" o "until Earth sets" se lee como si estuviera visible ahora. En ese caso la cuenta pasa a la salida: las horas entre `timeline[0].timestamp_utc` y el primer punto del timeline con el cuerpo visible. Es leer el timeline que manda el backend, no calcular física.
+`h` son las horas entre `timeline[0].timestamp_utc` y ese primer punto. Es leer el timeline que manda el backend, no calcular física. La misma regla aplica a la fila "Next set" de Detailed: en el caso 2 dice "Rises in".
 
-| `timeline[0]` | Hay un punto con el cuerpo visible | Sol | Tierra |
-| --- | --- | --- | --- |
-| oculto | sí, a `h` horas del inicio | "Sunrise in {h} hours" | "Earth rises in {h} hours" |
-| oculto | no | "No sunlight in this window" | "Earth never in view" |
-| visible | — | La tabla de arriba | La tabla de arriba |
-
-La misma regla aplica a la fila "Next set" de Detailed: con el cuerpo oculto en T+0 dice "Rises in", con el mismo cálculo.
+**Porcentaje redondeado.** "Sunlit 0% of the mission" con el Sol arriba una hora (Shackleton Rim, 0.3 %) parece una contradicción. Cuando el porcentaje es mayor que 0 y menor que 1, se muestra "<1%".
 
 ### 3.5 Errores
 
@@ -309,7 +306,7 @@ El paso 2 del tour depende de esto: sin la corrección, quien navega con teclado
 | X-03 | "Nearest shadow zone", "Permanent shadow", "Terrain & ice" | "Permanent shadow" como término; el título de la sección de Detailed pasa a "Terrain" |
 | C-07 | "Click the eye on a scenario to load its full timeline on the terrain." | "Click the eye on a scenario to see it on the globe with its full timeline." |
 | D12 | "Date" y "Time (UTC)" en Setup (`SetupPanel.tsx:96-97`); "Date (UTC)" en Compare (`ComparePanels.tsx:64`) | "Landing date" y "Landing time (UTC)" en Setup; "Landing date (UTC)" en Compare. Es la fecha del alunizaje, no la del despegue |
-| C-04 | "None" en "First sunset" y "First Earthset" de Compare (`ComparePanels.tsx:112-113`) | Con `null`, la tabla de §3.4 por porcentaje: "No sunset" o "Never in view". "Rises in N h" no aplica, porque Compare pide `/compare` sin timeline (`include_timeline: false`) |
+| C-04 | "None" en "First sunset" y "First Earthset" de Compare (`ComparePanels.tsx:112-113`) | Con `null`, según el porcentaje: 0 % → "Never in view"; 100 % → "Never sets". Cualquier otro porcentaje con `null` solo puede ser un astro que empezó oculto (los otros dos casos de `null` dan 0 % o 100 %), así que la celda dice "Rises later". Las horas exactas no se pueden dar, porque `/compare` no trae timeline (`P-012`) |
 | S-01 | "Illustrative descent · 440 m · 73.4 m/s" | "Illustrative descent · altitude 440 m · speed 73 m/s" |
 
 ### 4.5 Guardar en History (A-10)

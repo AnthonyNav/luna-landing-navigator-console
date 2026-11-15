@@ -49,9 +49,9 @@ Que cualquier persona entienda la consola y sus resultados sin ayuda externa. Es
 
 ## Preguntas para el handoff
 
-Son propuestas para `.handoff/PREGUNTAS.md`. No se editó el handoff: quien lo mantenga las copia con el siguiente id libre (hoy la última es `P-010`). La primera es la pregunta 10 que el usuario decidió pasar al handoff (D10); las de `power_factor` y PSR se fundieron en ella.
+Subidas a `PREGUNTAS.md` del handoff el 2026-11-14 como **`P-011`** (textos científicos, D10) y **`P-012`** (`hours_to_next_*` en `null`), en la rama `docs/preguntas-p-011-p-012-consola` del handoff. El texto de abajo es el resumen; la versión vigente es la del handoff.
 
-### Revisión de los textos científicos de las ayudas
+### P-011: revisión de los textos científicos de las ayudas
 
 - **Pregunta:** ¿Alguien del equipo de ciencia o backend puede revisar los textos en inglés de las ayudas antes de implementarlas? Son estos dos:
   - **`psr`:** "A permanently shadowed region (PSR) never sees the Sun. It is extremely cold and may hold water ice. This is the distance to the nearest one." ¿Es correcto? ¿Qué catálogo usa `/psr/nearby` y qué fuente se debe citar?
@@ -61,11 +61,9 @@ Son propuestas para `.handoff/PREGUNTAS.md`. No se editó el handoff: quien lo m
 - **Contexto:** spec de onboarding de la consola, `design.md` §2.4. Las métricas en pantalla son "Permanent shadow 1.8 km away" y "Solar power now · 71% of panel output". El contrato v1.3 sigue sin definir `power_factor`.
 - **Bloquea:** no. Las dos ayudas salen con texto neutro hasta tener la respuesta.
 
-### `hours_to_next_*` cuando el astro está oculto al inicio
+### P-012: qué significa `hours_to_next_*` en `null`
 
-- **Pregunta:** ¿`hours_to_next_earthset` (y `sunset`) cuenta hasta el primer ocaso de la ventana aunque el astro empiece oculto? ¿Habría forma de agregar `hours_to_next_earthrise` y `hours_to_next_sunrise` en un cambio aditivo?
-- **Contexto:** A-06 en `audit.md`. Mientras tanto la consola deriva la salida del timeline (`design.md` §3.4), lo cual no es cálculo físico. Aun así, un campo del servidor sería más claro.
-- **Bloquea:** no.
+El Backend oficial manda `null` en tres casos: el astro visible toda la ventana, nunca visible o **oculto al inicio**. La consola lo resuelve leyendo `timeline[0]` (`design.md` §3.4), pero `/compare` no trae timeline.
 
 ### Retirada: "el mock no sigue las reglas de `checks` de v1.2"
 

@@ -32,11 +32,13 @@ Cada tarea es un commit (Conventional Commits en español) y cita la sección de
 - **Spec:** 3.4. **Cierra:** A-05, A-06.
 - **Cambios:**
   - Función pura `countdown(body, summary, timeline)` en `src/core/utils/countdown.ts`. Devuelve `{ kind: 'until-set' | 'until-rise' | 'never' | 'always', hours }`.
-  - `Countdown` de Simple y la fila "Next set" de Detailed la usan.
-- **Aceptación:**
-  - Con el ejemplo del contrato §4.4 (`earth_visible_pct: 0` y `hours_to_next_earthset: null`) se lee "Earth never in view".
-  - Con la Tierra oculta en T+0 se lee "Earth rises in N hours".
-- **Pruebas:** `countdown.test.ts` cubre las cinco filas de las dos tablas de 3.4, para el Sol y para la Tierra.
+  - `Countdown` de Simple y la fila "Next set" de Detailed la usan. Los porcentajes entre 0 y 1 se muestran como "<1%".
+- **Aceptación (Backend oficial, 2026-12-01, 14 días, 60 min):**
+  - Chang'e 4 (2019-01-03) lee "Earth never in view".
+  - Peak Near Shackleton lee "Earth rises in N hours", no "Earth stays in view".
+  - Apollo 11 lee "Sunrise in N hours", no "No sunset in this window".
+  - Shackleton Rim lee "1 hour until sunset" y "Sunlit <1% of the mission".
+- **Pruebas:** `countdown.test.ts` cubre las cuatro filas de la tabla de 3.4 para el Sol y para la Tierra, el orden entre ellas (la fila 1 gana a la 2) y el redondeo "<1%".
 
 ### A4. `feat(store)`: marcar los resultados desactualizados
 - **Spec:** 3.2, fila "Resultados desactualizados". **Cierra:** A-07.
