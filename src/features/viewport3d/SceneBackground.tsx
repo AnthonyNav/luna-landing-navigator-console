@@ -6,17 +6,22 @@ import { GlobePlaceholder } from './GlobePlaceholder'
 
 /**
  * Fondo de la consola: siempre a pantalla completa, detrás de los paneles (handoff docs/11 §2).
- * Un solo render visible a la vez: el que no se ve se desmonta, así nunca hay dos contextos WebGL.
- * - viewMode 'globe': globo de D-011 por iframe (VITE_GLOBE_URL) o un placeholder si no hay URL.
- * - viewMode 'site': escena local del sitio (terrain/patch) en Three.js, dueña la consola.
+ * - El globo (D-011, VITE_GLOBE_URL) es el render principal y **nunca se desmonta**: así no se recarga
+ *   ni corta la cámara al simular. La simulación y la escena de alunizaje ocurren en él.
+ * - viewMode 'site' muestra encima la escena local del parche (`/terrain/patch`, "Terrain detail"),
+ *   con un fundido; el globo queda oculto debajo. Sin globo, la escena local es el fondo al simular.
  */
 export function SceneBackground() {
   const viewMode = useMissionStore((s) => s.viewMode)
   const hasTerrain = useMissionStore((s) => s.terrain !== null)
   const showSite = viewMode === 'site' && hasTerrain
   return (
-    <div className="fixed inset-0 z-0">
-      {showSite ? <LunarCanvas /> : GLOBE_URL ? <GlobeFrame /> : <GlobePlaceholder />}
+    <div className="fixed inset-0 z-0 bg-sky">
+      <div className={`absolute inset-0 transition-opacity duration-500 ease-[var(--ease-out)] ${showSite ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+        aria-hidden={showSite || undefined}>
+        {GLOBE_URL ? <GlobeFrame /> : <GlobePlaceholder />}
+      </div>
+      {showSite && <div className="fade-in absolute inset-0"><LunarCanvas /></div>}
     </div>
   )
 }

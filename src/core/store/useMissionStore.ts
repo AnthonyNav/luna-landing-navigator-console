@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { GLOBE_URL } from '@/core/config'
+import { useGlobeStore } from './useGlobeStore'
 import { api } from '@/core/api/endpoints'
 import { ApiError } from '@/core/api/errors'
 import { toUtcIso } from '@/core/utils/time'
@@ -6,7 +8,7 @@ import type { CompareResponse, Evaluation, HealthResponse, PsrNearby, Site, Terr
 
 export type Workspace = 'simulate' | 'compare' | 'history' | 'missions'
 export type DetailLevel = 'simple' | 'detailed'
-/** Qué render es el fondo (handoff docs/11 §2, P-006): globo sin sitio evaluado, escena local tras evaluar. */
+/** Qué se ve en el fondo (docs/02-renders.md): el globo siempre; 'site' pone encima la escena local del parche. */
 export type ViewMode = 'globe' | 'site'
 
 export interface SelectedSite { id?: string; lat: number; lon: number; label: string; category?: string }
@@ -118,7 +120,10 @@ export const useMissionStore = create<MissionState>((set, get) => ({
         api.terrainPatch({ lat, lon, size_km: 12, resolution: 128 }),
         api.psrNearby({ lat, lon }),
       ])
-      set({ evaluation, terrain, psrs, loading: false, viewMode: 'site', lastRunMs: performance.now() - t0 })
+      // Con el globo disponible la simulación se queda en él (vuelo continuo, sin cambio de motor);
+      // la escena local del parche queda como "Terrain detail". Sin globo, la escena local es el fondo.
+      const globeOk = !!GLOBE_URL && useGlobeStore.getState().link !== 'unavailable'
+      set({ evaluation, terrain, psrs, loading: false, viewMode: globeOk ? 'globe' : 'site', lastRunMs: performance.now() - t0 })
     } catch (e) { set({ error: e as ApiError, loading: false }) }
   },
   backToGlobe: () => set({ viewMode: 'globe', playing: false }),
@@ -144,6 +149,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       const comparison = await api.compare({
         scenarios: scenarios.map((s) => ({ label: s.label, lat: s.site.lat, lon: s.site.lon, start_utc: s.startUtc })),
         duration_days: durationDays, step_minutes: 120, panel_efficiency: panelEfficiency, panel_area_m2: panelAreaM2,
+        include_timeline: false, // v1.2 (D-014): la tabla solo usa los resúmenes; el timeline se pide al mostrar un escenario
       })
       set({ comparison, comparing: false })
     } catch (e) { set({ compareError: e as ApiError, comparing: false }) }
