@@ -64,6 +64,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/terrain/tiles/{z}/{row}/{col}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Terrain Tile
+         * @description Lunar elevation tile for the globe in the Moon Trek / Cesium geographic scheme (handoff P-008).
+         *
+         *     Covers the whole Moon so the globe can use a single terrain source: the LOLA south polar
+         *     DEM (20/40/80 m, best fit for the zoom level) where it has data, the global LOLA DEM elsewhere.
+         */
+        get: operations["get_terrain_tile_api_v1_terrain_tiles__z___row___col__png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/evaluate": {
         parameters: {
             query?: never;
@@ -949,6 +972,72 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
+            };
+        };
+    };
+    get_terrain_tile_api_v1_terrain_tiles__z___row___col__png_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Zoom level (0 to 9). Level 0 has 2 columns x 1 row */
+                z: number;
+                /** @description Tile row, 0 = north edge (0 to 2^z - 1) */
+                row: number;
+                /** @description Tile column, 0 starts at -180 deg (0 to 2^(z+1) - 1) */
+                col: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 256x256 Terrarium PNG: elevation_m = R*256 + G + B/256 - 32768, relative to the 1,737,400 m lunar sphere. Header X-Terrain-Source names the DEM used. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": unknown;
+                };
+            };
+            /** @description Not modified (If-None-Match matches the tile ETag) */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid JSON or missing required payload field */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Requested resource or route not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description z, row or col outside the tiling scheme */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The LOLA DEMs on the server do not cover the tile */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

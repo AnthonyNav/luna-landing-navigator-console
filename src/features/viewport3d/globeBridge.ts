@@ -1,5 +1,5 @@
 // Funciones puras del puente con el globo (sin React, sin red): fáciles de probar.
-import type { Evaluation, HealthResponse, PsrNearby, Site } from '@/types'
+import type { Evaluation, PsrNearby, Site } from '@/types'
 import type { FromGlobe, GlobePsr, GlobeSite, SkyBody, ToGlobe, Vec3 } from './globeProtocol'
 
 /** Si el globo no avisa READY en este tiempo se considera no disponible y la consola sigue con su escena local. */
@@ -49,9 +49,6 @@ export function skyStateMessage(evaluation: Evaluation | null, stepIndex: number
   const earth = body(t.earth_az_deg, t.earth_el_deg, t.earth_horizon_el_deg, t.earth_visible)
   return sun && earth ? { type: 'SET_SKY_STATE', payload: { sun, earth } } : null
 }
-
-/** Datos de muestra (mock): `/health` del contrato trae `engine`, el mock no. Misma regla que el chip de la barra superior. */
-export const isSampleData = (health: HealthResponse | null): boolean => !!health && !(health as Partial<HealthResponse>).engine
 
 /** PSR de `GET /psr/nearby`, sin tocar. */
 export const psrItems = (psrs: PsrNearby | null): GlobePsr[] =>

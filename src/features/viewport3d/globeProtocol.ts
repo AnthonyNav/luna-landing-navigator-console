@@ -29,7 +29,6 @@ export type ToGlobe =
   | { type: 'SHOW_HORIZON'; payload: { lat: number; lon: number; headingDeg?: number } }
   | { type: 'EXIT_HORIZON' }
   /** `sample: true` rotula el globo: la luz y el horizonte no son reales (mock). */
-  | { type: 'SET_DATA_MODE'; payload: { sample: boolean } }
   | { type: 'PLAY_LANDING_SCENE'; payload: { lat: number; lon: number; headingDeg?: number; startAltM?: number; durationS?: number; distanceM?: number; astronaut?: boolean } }
   | { type: 'STOP_LANDING_SCENE' }
   | { type: 'RESET' }

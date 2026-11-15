@@ -8,7 +8,7 @@ El globo es una app aparte (CesiumJS) que la consola incrusta en un iframe (D-01
 | --- | --- |
 | `GlobeFrame.tsx` | Monta el iframe con `?allowedOrigins=<origen de la consola>`, `sandbox="allow-scripts allow-same-origin"` y `referrerPolicy="no-referrer"`. Si `link = 'unavailable'` lo oculta y pinta el placeholder |
 | `useGlobeBridge.ts` | **Único** que envía y recibe mensajes. Se suscribe a `useMissionStore` y `useGlobeStore` |
-| `globeBridge.ts` | Funciones puras con pruebas: `toGlobeSites`, `skyMessages`, `horizonMessage`, `skyStateMessage`, `isSampleData` (regla única, también la usa el chip de la barra superior), `psrItems`, `landingMessage`, `fromGlobe`, `READY_TIMEOUT_MS` (8 s) |
+| `globeBridge.ts` | Funciones puras con pruebas: `toGlobeSites`, `skyMessages`, `horizonMessage`, `skyStateMessage`, `psrItems`, `landingMessage`, `fromGlobe`, `READY_TIMEOUT_MS` (8 s) |
 | `globeProtocol.ts` | Tipos `ToGlobe` / `FromGlobe` |
 | `useGlobeStore.ts` | Estado del enlace y de la escena |
 | `SceneControls.tsx` | Píldoras que piden o cierran la escena y muestran su fase |
@@ -29,7 +29,6 @@ El globo es una app aparte (CesiumJS) que la consola incrusta en un iframe (D-01
 | `SET_EARTH_LOCAL` | Igual que el Sol | `earth_vector_3d` tal cual |
 | `SET_PSR` | Al recibir `READY` (si hay PSR); cuando cambia `psrs` | `gid`, `name`, `geometry` de `/psr/nearby` |
 | `SELECT_SITE` | Al recibir `READY` (si hay selección y no hay escena pedida); al cambiar `selected`; al terminar cada `evaluate()`; al salir de la escena. **No** durante la escena | `{id, lat, lon, label}`. El globo vuela 2,5 s a 120 km sobre el sitio |
-| `SET_DATA_MODE` | Al recibir `READY` y al cambiar `health` | `{sample}`: `true` si `/health` no trae `engine` (mock). El globo rotula "Sample data" |
 | `SET_HORIZON_DETAIL` | Al recibir `READY` y al cambiar `detail` | `{detailed}`. Simple muestra nombres; Detailed añade azimut, elevación y holgura |
 | `SET_HORIZON` | Al pedir la vista de horizonte, y en cada corrida nueva mientras siga pedida | `horizon_profile` de `evaluate` tal cual, con `lat`/`lon` del sitio |
 | `SET_SKY_STATE` | Junto a `SET_SUN_LOCAL` / `SET_EARTH_LOCAL` (cada cambio de `stepIndex`) | `{sun, earth}` con `az`, `el`, `horizonEl`, `visible` de `timeline[stepIndex]` |

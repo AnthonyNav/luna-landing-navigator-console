@@ -2,7 +2,7 @@ import { useEffect, type RefObject } from 'react'
 import { GLOBE_URL } from '@/core/config'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { useGlobeStore } from '@/core/store/useGlobeStore'
-import { READY_TIMEOUT_MS, fromGlobe, horizonMessage, isSampleData, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
+import { READY_TIMEOUT_MS, fromGlobe, horizonMessage, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
 import type { ToGlobe } from './globeProtocol'
 
 /**
@@ -34,7 +34,6 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
       if (state) post(state) // azimut, elevación y holgura para las etiquetas de la vista de horizonte
     }
     const sendMode = () => {
-      post({ type: 'SET_DATA_MODE', payload: { sample: isSampleData(mission().health) } })
       post({ type: 'SET_HORIZON_DETAIL', payload: { detailed: mission().detail === 'detailed' } })
     }
     // Perfil, cielo del paso actual y luego el vuelo: el globo usa el cielo para encuadrar hacia el Sol

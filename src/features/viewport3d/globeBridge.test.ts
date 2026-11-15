@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { fromGlobe, horizonMessage, isSampleData, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
-import type { Evaluation, HealthResponse, PsrNearby, Site } from '@/types'
+import { fromGlobe, horizonMessage, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
+import type { Evaluation, PsrNearby, Site } from '@/types'
 
 const site = (o: Partial<Site> = {}) => ({ id: 'a', name: 'A', category: 'Artemis III', lat: -84.79, lon: 31.2, ...o }) as Site
 const evaluation = (o: Record<string, unknown> = {}) =>
@@ -71,14 +71,6 @@ describe('skyStateMessage', () => {
     expect(skyStateMessage(null, 0)).toBeNull()
     expect(skyStateMessage(evaluation({ timeline: [t()] }), 5)).toBeNull()
     expect(skyStateMessage(evaluation({ timeline: [t({ sun_az_deg: Number.NaN })] }), 0)).toBeNull()
-  })
-})
-
-describe('isSampleData', () => {
-  it('el mock no trae `engine` en /health; el backend real sí', () => {
-    expect(isSampleData({ status: 'ok' } as unknown as HealthResponse)).toBe(true)
-    expect(isSampleData({ status: 'ok', engine: { available: true } } as unknown as HealthResponse)).toBe(false)
-    expect(isSampleData(null)).toBe(false)
   })
 })
 
