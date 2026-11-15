@@ -2,7 +2,7 @@ import { useEffect, type RefObject } from 'react'
 import { GLOBE_URL } from '@/core/config'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { useGlobeStore } from '@/core/store/useGlobeStore'
-import { READY_TIMEOUT_MS, fromGlobe, landingMessage, psrItems, skyMessages, toGlobeSites } from './globeBridge'
+import { READY_TIMEOUT_MS, fromGlobe, horizonMessage, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
 import type { ToGlobe } from './globeProtocol'
 
 /**
@@ -11,6 +11,8 @@ import type { ToGlobe } from './globeProtocol'
  *   se recarga, cada READY reenvía el estado completo.
  * - La simulación ocurre en el globo: al evaluar vuela al sitio y la escena de alunizaje parte de esa vista.
  * - Sol y Tierra siguen al scrubber (cero red, D-003), agrupados por fotograma.
+ * - Vista de horizonte (Lander POV, docs/05 §5.2): el globo baja de la esfera al suelo del sitio evaluado y
+ *   muestra Sol y Tierra contra la silueta de `horizon_profile`. Se pide con `horizon.requested`.
  * - Si el globo no responde READY en 8 s, la consola sigue sin él (`link: 'unavailable'`).
  */
 export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
@@ -26,7 +28,23 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
     const timeout = window.setTimeout(() => { if (!ready) globe().setLink('unavailable') }, READY_TIMEOUT_MS)
 
     const post = (m: ToGlobe) => frame.current?.contentWindow?.postMessage(m, origin)
-    const sendSky = () => skyMessages(mission().evaluation, mission().stepIndex).forEach(post)
+    const sendSky = () => {
+      skyMessages(mission().evaluation, mission().stepIndex).forEach(post)
+      const state = skyStateMessage(mission().evaluation, mission().stepIndex)
+      if (state) post(state) // azimut, elevación y holgura para las etiquetas de la vista de horizonte
+    }
+    const sendMode = () => {
+      post({ type: 'SET_HORIZON_DETAIL', payload: { detailed: mission().detail === 'detailed' } })
+    }
+    // Perfil, cielo del paso actual y luego el vuelo: el globo usa el cielo para encuadrar hacia el Sol
+    const startHorizon = () => {
+      const ev = mission().evaluation
+      const profile = horizonMessage(ev)
+      if (!ev || !profile) return
+      post(profile)
+      sendSky()
+      post({ type: 'SHOW_HORIZON', payload: { lat: ev.site.lat, lon: ev.site.lon } })
+    }
     const sendSites = () => post({ type: 'SET_SITES', payload: toGlobeSites(mission().sites, mission().evaluation) })
     const startLanding = () => {
       const play = landingMessage(mission().evaluation)
@@ -41,11 +59,13 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
     }
     const pushAll = () => {
       const m = mission()
+      sendMode()
       sendSites()
       sendSky()
       const psr = psrItems(m.psrs)
       if (psr.length) post({ type: 'SET_PSR', payload: psr })
       if (globe().landing.requested) startLanding()
+      else if (globe().horizon.requested) startHorizon()
       else flyToSelected()
     }
 
@@ -65,6 +85,7 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
         case 'GLOBE_CLICKED':
           if (!globe().landing.requested) mission().select({ lat: msg.payload.lat, lon: msg.payload.lon, label: 'Custom pin' })
           break
+        case 'HORIZON_PHASE': globe().setHorizonPhase(msg.payload.phase); break
         case 'SCENE_PHASE': globe().setPhase(msg.payload.phase); break
         case 'SCENE_TELEMETRY': globe().setTelemetry(msg.payload.altM, msg.payload.vMps); break
         case 'SCENE_ERROR': globe().setLandingError(msg.payload.reason); break
@@ -81,13 +102,22 @@ export function useGlobeBridge(frame: RefObject<HTMLIFrameElement | null>) {
         raf = requestAnimationFrame(sendSky)
       }
       if (s.psrs !== p.psrs) post({ type: 'SET_PSR', payload: psrItems(s.psrs) })
-      // Elegir un sitio o terminar una corrida recentra el globo en él (salvo durante la escena)
+      if (s.health !== p.health || s.detail !== p.detail) sendMode()
+      // Elegir un sitio o terminar una corrida recentra el globo en él (salvo durante la escena o el horizonte).
+      // Con la vista de horizonte activa, una corrida nueva (Simulate, Compare, History, Missions) lleva el
+      // horizonte al sitio nuevo en vez de volver a la esfera.
       const reran = s.evaluation !== p.evaluation && s.evaluation !== null
-      if (((s.selected !== p.selected && s.selected) || reran) && !globe().landing.requested) flyToSelected()
+      const inScene = globe().landing.requested
+      if (globe().horizon.requested && !inScene) {
+        if (reran) startHorizon()
+      } else if (((s.selected !== p.selected && s.selected) || reran) && !inScene) flyToSelected()
     })
     const unsubGlobe = useGlobeStore.subscribe((s, p) => {
       if (!ready) return
       if (s.landing.requested && !p.landing.requested) startLanding()
+      if (s.horizon.requested && !p.horizon.requested) startHorizon()
+      // Salir del horizonte: el globo vuela de vuelta a la esfera sobre el sitio (si no es porque empezó la escena)
+      if (!s.horizon.requested && p.horizon.requested && !s.landing.requested) post({ type: 'EXIT_HORIZON' })
       // Salir de la escena (o un error): el globo limpia módulo y polvo y vuelve a encuadrar el sitio
       if (!s.landing.requested && p.landing.requested) { post({ type: 'STOP_LANDING_SCENE' }); flyToSelected() }
     })

@@ -20,7 +20,8 @@ Qué hace cada control: la acción del store que dispara, si pide algo a la red 
 | Estado | Píldoras | Acción |
 | --- | --- | --- |
 | Sin evaluación | Ninguna (o el error de escena si lo hubo) | — |
-| Evaluado, globo listo, `viewMode = 'globe'` | "Landing scene" | `requestLanding()` → escena en el globo |
+| Evaluado, globo listo, `viewMode = 'globe'` | "Horizon view" y "Landing scene" | `requestHorizon()` → el globo baja al suelo del sitio; `requestLanding()` → escena en el globo |
+| Vista de horizonte pedida | Fase ("Drag to look around · scrub the timeline") y "Back to globe" | `clearHorizon()` → `EXIT_HORIZON`, vuelo de regreso a la esfera. La bandera persiste entre corridas: Compare, History y Missions llevan el horizonte al sitio nuevo |
 | Evaluado, con `terrain`, `viewMode = 'globe'` | "Terrain detail" | `showSite()` → escena local encima del globo |
 | `viewMode = 'site'` | "Back to globe" ("Global view" sin `VITE_GLOBE_URL`) | `backToGlobe()`; también pausa la reproducción |
 | Escena pedida | Fase + telemetría (informativa) y "Exit scene" | `clearLanding()` → `STOP_LANDING_SCENE` y vuelo al sitio |

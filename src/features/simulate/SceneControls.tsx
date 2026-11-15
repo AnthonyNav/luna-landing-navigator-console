@@ -1,8 +1,8 @@
-import { Clapperboard, Globe2, LogOut, Mountain } from 'lucide-react'
+import { Clapperboard, Globe2, LogOut, Mountain, Sunrise } from 'lucide-react'
 import { GLOBE_URL } from '@/core/config'
 import { useMissionStore } from '@/core/store/useMissionStore'
 import { useGlobeStore } from '@/core/store/useGlobeStore'
-import type { ScenePhase } from '@/features/viewport3d/globeProtocol'
+import type { HorizonPhase, ScenePhase } from '@/features/viewport3d/globeProtocol'
 import { Pill } from '@/ui'
 
 const PHASE_TEXT: Record<ScenePhase, string> = {
@@ -10,6 +10,12 @@ const PHASE_TEXT: Record<ScenePhase, string> = {
   descent: 'Illustrative descent',
   landed: 'Touchdown',
   done: 'Drag to look around',
+}
+
+const HORIZON_TEXT: Record<HorizonPhase, string> = {
+  arrival: 'Flying down to the horizon…',
+  ready: 'Drag to look around · scrub the timeline',
+  leaving: 'Back to orbit…',
 }
 
 /**
@@ -27,6 +33,9 @@ export function SceneControls() {
   const link = useGlobeStore((s) => s.link)
   const requestLanding = useGlobeStore((s) => s.requestLanding)
   const clearLanding = useGlobeStore((s) => s.clearLanding)
+  const horizon = useGlobeStore((s) => s.horizon)
+  const requestHorizon = useGlobeStore((s) => s.requestHorizon)
+  const clearHorizon = useGlobeStore((s) => s.clearHorizon)
   const globeReady = !!GLOBE_URL && link === 'ready'
 
   // Escena de alunizaje en curso (en el globo)
@@ -57,6 +66,18 @@ export function SceneControls() {
   if (!hasEvaluation) return landing.error ? <Pill className="pointer-events-none" aria-live="polite">{landing.error}</Pill> : null
   return (
     <>
+      {/* Vista de horizonte: el Sol y la Tierra del timeline contra la silueta real del terreno (docs/05 §5.2) */}
+      {globeReady && !horizon.requested && (
+        <Pill onClick={requestHorizon} aria-label="See the Sun and Earth over the local horizon">
+          <Sunrise size={14} aria-hidden />Horizon view
+        </Pill>
+      )}
+      {globeReady && horizon.requested && (
+        <>
+          <Pill aria-live="polite" className="pointer-events-none"><Sunrise size={14} aria-hidden />{HORIZON_TEXT[horizon.phase ?? 'arrival']}</Pill>
+          <Pill onClick={clearHorizon} aria-label="Back to the globe"><Globe2 size={14} aria-hidden />Back to globe</Pill>
+        </>
+      )}
       {globeReady && (
         <Pill onClick={requestLanding} aria-label="Watch an illustrative landing at this site">
           <Clapperboard size={14} aria-hidden />Landing scene

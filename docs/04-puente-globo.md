@@ -8,7 +8,7 @@ El globo es una app aparte (CesiumJS) que la consola incrusta en un iframe (D-01
 | --- | --- |
 | `GlobeFrame.tsx` | Monta el iframe con `?allowedOrigins=<origen de la consola>`, `sandbox="allow-scripts allow-same-origin"` y `referrerPolicy="no-referrer"`. Si `link = 'unavailable'` lo oculta y pinta el placeholder |
 | `useGlobeBridge.ts` | **Único** que envía y recibe mensajes. Se suscribe a `useMissionStore` y `useGlobeStore` |
-| `globeBridge.ts` | Funciones puras con pruebas: `toGlobeSites`, `skyMessages`, `psrItems`, `landingMessage`, `fromGlobe`, `READY_TIMEOUT_MS` (8 s) |
+| `globeBridge.ts` | Funciones puras con pruebas: `toGlobeSites`, `skyMessages`, `horizonMessage`, `skyStateMessage`, `psrItems`, `landingMessage`, `fromGlobe`, `READY_TIMEOUT_MS` (8 s) |
 | `globeProtocol.ts` | Tipos `ToGlobe` / `FromGlobe` |
 | `useGlobeStore.ts` | Estado del enlace y de la escena |
 | `SceneControls.tsx` | Píldoras que piden o cierran la escena y muestran su fase |
@@ -29,6 +29,11 @@ El globo es una app aparte (CesiumJS) que la consola incrusta en un iframe (D-01
 | `SET_EARTH_LOCAL` | Igual que el Sol | `earth_vector_3d` tal cual |
 | `SET_PSR` | Al recibir `READY` (si hay PSR); cuando cambia `psrs` | `gid`, `name`, `geometry` de `/psr/nearby` |
 | `SELECT_SITE` | Al recibir `READY` (si hay selección y no hay escena pedida); al cambiar `selected`; al terminar cada `evaluate()`; al salir de la escena. **No** durante la escena | `{id, lat, lon, label}`. El globo vuela 2,5 s a 120 km sobre el sitio |
+| `SET_HORIZON_DETAIL` | Al recibir `READY` y al cambiar `detail` | `{detailed}`. Simple muestra nombres; Detailed añade azimut, elevación y holgura |
+| `SET_HORIZON` | Al pedir la vista de horizonte, y en cada corrida nueva mientras siga pedida | `horizon_profile` de `evaluate` tal cual, con `lat`/`lon` del sitio |
+| `SET_SKY_STATE` | Junto a `SET_SUN_LOCAL` / `SET_EARTH_LOCAL` (cada cambio de `stepIndex`) | `{sun, earth}` con `az`, `el`, `horizonEl`, `visible` de `timeline[stepIndex]` |
+| `SHOW_HORIZON` | Tras `SET_HORIZON` y el cielo, al pasar `horizon.requested` a `true`; en `READY` si ya estaba pedida | `{lat, lon}` de `evaluation.site`. El globo baja de la esfera al suelo |
+| `EXIT_HORIZON` | Al pasar `horizon.requested` a `false` (salvo si empieza la escena de alunizaje, que cierra el horizonte sola) | — |
 | `PLAY_LANDING_SCENE` | Al pasar `landing.requested` a `true`, o en `READY` si ya estaba pedida | Solo `{lat, lon}` de `evaluation.site`. Antes se reenvían Sol y Tierra del paso actual |
 | `STOP_LANDING_SCENE` | Al pasar `landing.requested` a `false` ("Exit scene" o error) | — |
 
@@ -41,6 +46,7 @@ Declarados pero sin uso hoy: `RESET`. Existen en el globo y la consola no los us
 | `READY` | `link = 'ready'`, cancela el plazo de 8 s y envía el estado completo (ver secuencia) |
 | `SITE_CLICKED` | `select()` del sitio, salvo durante la escena. No evalúa |
 | `GLOBE_CLICKED` | `select()` de un "Custom pin" en ese punto, salvo durante la escena. No evalúa |
+| `HORIZON_PHASE` | `horizon.phase` (`arrival`, `ready`, `leaving`) |
 | `SCENE_PHASE` | `landing.phase` |
 | `SCENE_TELEMETRY` | `landing.altM`, `landing.vMps` |
 | `SCENE_ERROR` | `landing.error` y `requested = false` (lo que dispara `STOP_LANDING_SCENE` y el vuelo al sitio) |
@@ -75,6 +81,19 @@ El store cambia `evaluation` y `psrs` en un solo `set`; el puente detecta cada c
 ### Scrubber y reproducción
 
 Cada cambio de `stepIndex` cancela el fotograma pendiente y agenda uno nuevo que manda `SET_SUN_LOCAL` y `SET_EARTH_LOCAL`. Con Play a 4× son unos 10 cambios por segundo. La cámara del globo no se mueve. Si la escena de alunizaje está corriendo, el globo reorienta el Sol y la luz de los modelos sin detener la escena.
+
+### Vista de horizonte
+
+```
+"Horizon view" → requestHorizon() → horizon = {requested: true}   (y apaga la escena si la había)
+               → puente: SET_HORIZON → SET_SKY_STATE + SET_SUN_LOCAL + SET_EARTH_LOCAL → SHOW_HORIZON {lat, lon}
+globo → HORIZON_PHASE arrival (vuelo de ~6 s) → ready (arrastrar mira a la redonda)
+scrubber       → SET_SKY_STATE + Sol y Tierra por fotograma (el astro se mueve contra la silueta y se oculta o aparece)
+nueva corrida  → SET_HORIZON + cielo + SHOW_HORIZON (no SELECT_SITE: el horizonte sigue)
+"Back to globe" → clearHorizon() → EXIT_HORIZON → HORIZON_PHASE leaving (vuelo de regreso a la esfera)
+```
+
+El globo cierra la vista de horizonte si recibe `SELECT_SITE`, `SET_VIEW` o la escena de alunizaje. Por eso el puente no manda `SELECT_SITE` mientras `horizon.requested`.
 
 ### Escena de alunizaje
 
