@@ -28,7 +28,7 @@ Las herramientas actuales (JPL Horizons, Quickmap, Moon Trek) obligan a cruzar v
 
 - Escritorio, pantalla completa sin scroll. Se usa en vivo en la demo, en proyector y en un video de 2 minutos o menos.
 - El timeline se carga una vez y se recorre en memoria (D-003).
-- Datos: API v1 o mock, solo por `VITE_API_BASE_URL` (ver `CLAUDE.md`).
+- Datos: el Backend oficial de la API v1, solo por `VITE_API_BASE_URL` (ver `CLAUDE.md`). El mock no se usa.
 
 ## Capabilities and Constraints
 

@@ -117,7 +117,7 @@ Si cualquiera de las tres peticiones falla, falla toda la corrida (ver [`06`](06
 
 | Variable | Uso | Sin valor |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | Base de la API, incluye `/api/v1` (`src/core/api/client.ts`) | `http://localhost:3000/api/v1` (puerto del mock) |
+| `VITE_API_BASE_URL` | Base de la API, incluye `/api/v1` (`src/core/api/client.ts`) | `http://localhost:3000/api/v1`, valor de respaldo del código: sin un backend ahí, la consola queda en Offline |
 | `VITE_GLOBE_URL` | URL del globo (`src/core/config.ts`) | Placeholder en lugar del globo; al evaluar, escena local |
 
 Las URLs vigentes están solo en `.handoff/docs/07-ambientes-y-pruebas.md`. `.env.local` está ignorado por git; `.env.example` trae los nombres.

@@ -1,4 +1,4 @@
-// Contrato v1.1 (docs/06, D-010): backend en vivo y mock responden ErrorResponse
+// Contrato v1.1 (docs/06, D-010): el backend responde ErrorResponse
 // { error: { code, message, details }, detail? }. Decidir SIEMPRE por `error.code`.
 // El respaldo `{ detail }` solo queda para el backend oficial, que aún no cumple P-001
 // (contexto-sesiones/iniciativas/lunar-landing-navigator/HANDOFF.md, pendiente 3).
