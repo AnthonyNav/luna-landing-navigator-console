@@ -11,6 +11,8 @@ export interface GlobePsr { gid: number; name?: string | null; geometry: { type:
 export type ScenePhase = 'arrival' | 'descent' | 'landed' | 'done'
 export type Vec3 = [number, number, number]
 export interface SkyBody { az: number; el: number; horizonEl: number; visible: boolean }
+/** Pin de un escenario de Compare: `label` es la letra (A–E). */
+export interface GlobeComparePin { id: string; label: string; lat: number; lon: number; status?: MissionStatus; best?: boolean }
 export type HorizonPhase = 'arrival' | 'ready' | 'leaving'
 
 export type ToGlobe =
@@ -20,6 +22,12 @@ export type ToGlobe =
   | { type: 'SET_SUN_LOCAL'; payload: { lat: number; lon: number; vector: Vec3 } }
   | { type: 'SET_EARTH_LOCAL'; payload: { lat: number; lon: number; vector: Vec3 } }
   | { type: 'SET_PSR'; payload: GlobePsr[] }
+  /** `GET /ephemeris` tal cual: Sol y Tierra desde el centro de la Luna (marco fijo lunar). Para la vista global, antes de evaluar. */
+  | { type: 'SET_SKY_GLOBAL'; payload: { sun: { direction: Vec3 }; earth: { direction: Vec3; distanceKm?: number } } }
+  /** Pines A–E de los escenarios de Compare; el recomendado lleva `best`. Lista vacía los quita. */
+  | { type: 'SET_COMPARE_PINS'; payload: GlobeComparePin[] }
+  /** Marcador del lugar elegido que no es un sitio del catálogo (clic en el globo o misión). `null` lo quita. */
+  | { type: 'SET_CUSTOM_PIN'; payload: { lat: number; lon: number; label?: string } | null }
   /** `horizon_profile` de `POST /evaluate`, tal cual. Va antes de SHOW_HORIZON. */
   | { type: 'SET_HORIZON'; payload: { lat: number; lon: number; profile: { az_deg: number; horizon_el_deg: number }[] } }
   /** Cielo del paso actual del scrubber (campos de `timeline[stepIndex]`). */
@@ -28,7 +36,6 @@ export type ToGlobe =
   /** Vista de horizonte (Lander POV, docs/05 §5.2): del globo al suelo del sitio. */
   | { type: 'SHOW_HORIZON'; payload: { lat: number; lon: number; headingDeg?: number } }
   | { type: 'EXIT_HORIZON' }
-  /** `sample: true` rotula el globo: la luz y el horizonte no son reales (mock). */
   | { type: 'PLAY_LANDING_SCENE'; payload: { lat: number; lon: number; headingDeg?: number; startAltM?: number; durationS?: number; distanceM?: number; astronaut?: boolean } }
   | { type: 'STOP_LANDING_SCENE' }
   | { type: 'RESET' }

@@ -20,13 +20,16 @@ Lo que hoy se ve o se comporta mal, con su causa en el código, y lo que falta p
 
 | Problema | Causa | Camino propuesto |
 | --- | --- | --- |
-| Si falla `/terrain/patch` o `/psr/nearby`, toda la corrida falla aunque `/evaluate` haya respondido | `evaluate()` usa un solo `Promise.all` | `Promise.allSettled`: el veredicto no depende del parche ni de las PSR |
-| Cambiar solo la fecha repite `/terrain/patch` y `/psr/nearby` | Pendiente marcado como `TODO` en `useMissionStore.evaluate` | Reusar el parche y las PSR si `lat`/`lon` no cambiaron |
 | Si el globo vence su plazo después de evaluar, queda el placeholder en vez de la escena local | `viewMode` se decide al terminar `evaluate()`, cuando `link` aún era `loading` | Pasar a `'site'` cuando `link` cambia a `unavailable` con una evaluación presente |
 | Elegir otro sitio o volver a evaluar durante la escena de alunizaje no la cambia de sitio | El puente omite `SELECT_SITE` mientras `landing.requested` | Cerrar la escena al cambiar de sitio, o reiniciarla en el nuevo |
 | En History no hay forma de salir de la escena | History no tiene slot `top` | Salir de la escena al cambiar de workspace, o poner las píldoras en History |
-| Cada evaluación del mismo sitio repite el vuelo de 2,5 s | El puente manda `SELECT_SITE` tras cada `evaluate()` | Enviarlo solo si cambió el sitio |
-| El globo no tiene Sol antes de la primera evaluación | La consola solo tiene vectores dentro de `/evaluate` | Usar `GET /ephemeris` (v1.2, `P-007`) cuando el ambiente lo sirva |
+
+## Resuelto en este PR
+- `evaluate()` usa `Promise.allSettled`: si falla el parche o `/psr/nearby`, el veredicto llega y Results avisa qué falta (`auxFailed`).
+- Cambiar solo la fecha en el mismo lugar pide solo `/evaluate` (el parche y las PSR se reusan).
+- Repetir la corrida en el mismo sitio no repite el vuelo de 2,5 s.
+- El globo tiene Sol y Tierra antes de evaluar (`GET /ephemeris`, `SET_SKY_GLOBAL`, con la distancia real a la Tierra) y las PSR del polo (`GET /psr`, ≥ 50 km²).
+- Pines A–E de Compare (estado del backend, recomendado resaltado) y marcador del pin libre o de la misión.
 
 ## Datos y textos
 

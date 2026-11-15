@@ -27,8 +27,11 @@ El globo es una app aparte (CesiumJS) que la consola incrusta en un iframe (D-01
 | `SET_SITES` | Al recibir `READY`; cuando cambian `sites` o `evaluation` | Sitios de `/sites`. `status` solo en el que coincide con `evaluation.site` (por `lat`/`lon` con tolerancia 1e-6) |
 | `SET_SUN_LOCAL` | Al recibir `READY`; cuando cambian `evaluation` o `stepIndex` (agrupado en un `requestAnimationFrame`); antes de la escena | `{lat, lon, vector}` con `timeline[stepIndex].sun_vector_3d` tal cual. Si el vector no es válido, no se envía y el globo no dibuja Sol |
 | `SET_EARTH_LOCAL` | Igual que el Sol | `earth_vector_3d` tal cual |
-| `SET_PSR` | Al recibir `READY` (si hay PSR); cuando cambia `psrs` | `gid`, `name`, `geometry` de `/psr/nearby` |
-| `SELECT_SITE` | Al recibir `READY` (si hay selección y no hay escena pedida); al cambiar `selected`; al terminar cada `evaluate()`; al salir de la escena. **No** durante la escena | `{id, lat, lon, label}`. El globo vuela 2,5 s a 120 km sobre el sitio |
+| `SET_SKY_GLOBAL` | Con `READY`, al cargar `ephemeris` y al cambiar la fecha, **solo sin evaluación** (con una, el cielo sale de los vectores del sitio) | `GET /ephemeris` de la fecha de inicio: `direction` del Sol y de la Tierra y `distance_km` de la Tierra |
+| `SET_PSR` | Con `READY`; cuando cambia `psrs` o `polePsrs` | `gid`, `name`, `geometry`. Las de `/psr/nearby` del sitio evaluado si las hay; si no, las de `/psr?min_area_km2=50` (≈ 67 regiones del polo) |
+| `SET_COMPARE_PINS` | Con `READY`; al cambiar `scenarios`, `comparison`, `rankBy` o `workspace` | Letras A–E de los escenarios, solo en el workspace Compare (fuera, lista vacía). Con comparación hecha llevan `status` del backend y `best` según el criterio "Rank by" |
+| `SET_CUSTOM_PIN` | Con `READY`; al cambiar `selected` o `sites` | Marcador del lugar elegido que no es del catálogo (clic libre o una misión); `null` si es un sitio del catálogo |
+| `SELECT_SITE` | Al recibir `READY` (si hay selección y no hay escena pedida); al cambiar `selected`; al terminar un `evaluate()` **en un sitio distinto al de la corrida anterior** (misma ubicación y otra fecha no repite el vuelo); al salir de la escena. **No** durante la escena | `{id, lat, lon, label}`. El globo vuela 2,5 s a 120 km sobre el sitio |
 | `SET_HORIZON_DETAIL` | Al recibir `READY` y al cambiar `detail` | `{detailed}`. Simple muestra nombres; Detailed añade azimut, elevación y holgura |
 | `SET_HORIZON` | Al pedir la vista de horizonte, y en cada corrida nueva mientras siga pedida | `horizon_profile` de `evaluate` tal cual, con `lat`/`lon` del sitio |
 | `SET_SKY_STATE` | Junto a `SET_SUN_LOCAL` / `SET_EARTH_LOCAL` (cada cambio de `stepIndex`) | `{sun, earth}` con `az`, `el`, `horizonEl`, `visible` de `timeline[stepIndex]` |

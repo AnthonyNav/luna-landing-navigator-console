@@ -14,4 +14,6 @@ export type HorizonPoint = S['HorizonPoint']
 export type CompareRequest = S['CompareRequest']
 export type CompareResponse = S['CompareResponse']
 export type PsrNearby = S['PsrNearbyResponse']
+export type PsrList = S['PsrListResponse']
+export type Ephemeris = S['EphemerisResponse']
 export type MissionStatus = 'GO' | 'CAUTION' | 'NO-GO' // contrato §2.4

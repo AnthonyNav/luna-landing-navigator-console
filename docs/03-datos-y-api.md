@@ -108,12 +108,17 @@ De dónde sale el DEM en el backend (verificado con el backend oficial el 2026-1
 
 `results[i]` se asocia con `scenarios[i]` por posición. Para ver el timeline de un escenario, el ojo hace un `evaluate()` completo de ese escenario (no usa `include_timeline`).
 
+### Endpoints que la consola pide solo para el globo
+
+| Endpoint | Uso |
+| --- | --- |
+| `GET /ephemeris?utc=` (v1.2) | Al iniciar y al cambiar la fecha. Sol, Tierra y distancia real a la Tierra desde el centro de la Luna: el cielo de la vista global, solo mientras no hay evaluación (`SET_SKY_GLOBAL`). Si falla, el globo queda sin Sol |
+| `GET /psr?limit=100&min_area_km2=50&simplify_m=1000` (v1.2) | Una vez al iniciar. Las ~67 PSR grandes del polo (de 1.531). Se ven hasta que una evaluación trae las de `/psr/nearby` |
+
 ### Endpoints del contrato que la consola no usa
 
 | Endpoint | Para qué serviría |
 | --- | --- |
-| `GET /psr` (v1.2) | Catálogo completo de PSR para el globo (`/psr/nearby` corta en 200) |
-| `GET /ephemeris` (v1.2) | Sol y Tierra desde el centro de la Luna, para dar cielo al globo sin sitio evaluado (`P-007`) |
 | `GET /terrain/tiles/{z}/{row}/{col}.png` (v1.3, D-016) | Relieve LOLA de toda la Luna para el globo (40 m/px en el polo sur desde `z = 9`). Lo pediría el globo, no la consola: depende de `P-010` |
 
 La URL "Producción / Demo Pública" de `docs/07` sirve v1.1: ahí `/psr`, `/ephemeris` y `/terrain/tiles` dan `404` y no llegan `checks` ni los metadatos de `grid`. La URL "Backend oficial" sirve v1.3 y es la que usa la consola.

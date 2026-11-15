@@ -1,6 +1,9 @@
 // Funciones puras del puente con el globo (sin React, sin red): fáciles de probar.
-import type { Evaluation, PsrNearby, Site } from '@/types'
-import type { FromGlobe, GlobePsr, GlobeSite, SkyBody, ToGlobe, Vec3 } from './globeProtocol'
+import type { Ephemeris, Evaluation, PsrList, PsrNearby, Site } from '@/types'
+import type { Scenario, SelectedSite } from '@/core/store/useMissionStore'
+import type { CompareResponse } from '@/types'
+import { rank, type Priority } from '@/core/utils/compare'
+import type { FromGlobe, GlobeComparePin, GlobePsr, GlobeSite, SkyBody, ToGlobe, Vec3 } from './globeProtocol'
 
 /** Si el globo no avisa READY en este tiempo se considera no disponible y la consola sigue con su escena local. */
 export const READY_TIMEOUT_MS = 8000
@@ -48,6 +51,36 @@ export function skyStateMessage(evaluation: Evaluation | null, stepIndex: number
   const sun = body(t.sun_az_deg, t.sun_el_deg, t.sun_horizon_el_deg, t.sun_visible)
   const earth = body(t.earth_az_deg, t.earth_el_deg, t.earth_horizon_el_deg, t.earth_visible)
   return sun && earth ? { type: 'SET_SKY_STATE', payload: { sun, earth } } : null
+}
+
+/**
+ * Cielo de la vista global: Sol y Tierra desde el centro de la Luna, tal cual `GET /ephemeris` (D-002: no se calcula nada).
+ * Solo se usa sin evaluación; con una evaluación el cielo sale de los vectores del sitio (`skyMessages`).
+ */
+export function skyGlobalMessage(eph: Ephemeris | null): ToGlobe | null {
+  if (!eph || !isVec3(eph.sun.direction) || !isVec3(eph.earth.direction)) return null
+  const km = eph.earth.distance_km
+  return { type: 'SET_SKY_GLOBAL', payload: { sun: { direction: eph.sun.direction }, earth: { direction: eph.earth.direction, distanceKm: Number.isFinite(km) && km > 0 ? km : undefined } } }
+}
+
+/** Pines A–E. Con comparación hecha llevan el estado del backend y el recomendado según el criterio elegido (`rank`). */
+export function comparePins(scenarios: Scenario[], comparison: CompareResponse | null, priority: Priority): GlobeComparePin[] {
+  const best = comparison ? rank(comparison.results, priority)[0] : undefined
+  return scenarios.map((s, i) => {
+    const r = comparison?.results[i]
+    return { id: s.key, label: String.fromCharCode(65 + i), lat: s.site.lat, lon: s.site.lon, status: r?.site.status, best: !!r && r === best }
+  })
+}
+
+/** Marcador para un lugar elegido que no es un sitio del catálogo (clic libre en el globo o una misión). */
+export function customPinMessage(selected: SelectedSite | null, sites: Site[]): Extract<ToGlobe, { type: 'SET_CUSTOM_PIN' }> {
+  if (!selected || sites.some((s) => s.id === selected.id)) return { type: 'SET_CUSTOM_PIN', payload: null }
+  return { type: 'SET_CUSTOM_PIN', payload: { lat: selected.lat, lon: selected.lon, label: selected.label } }
+}
+
+/** PSR de `GET /psr` (catálogo del polo) o de `GET /psr/nearby` (un sitio), sin tocar. */
+export function globalPsrItems(psrs: PsrList | null): GlobePsr[] {
+  return (psrs?.psrs ?? []).map((p) => ({ gid: p.gid, name: p.name, geometry: p.geometry }))
 }
 
 /** PSR de `GET /psr/nearby`, sin tocar. */

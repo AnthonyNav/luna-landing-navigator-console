@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Columns2, Eye, Plus, Trash2 } from 'lucide-react'
 import { MAX_SCENARIOS, useMissionStore, type Scenario } from '@/core/store/useMissionStore'
-import { bestIndex, rank, type Priority } from '@/core/utils/compare'
+import { bestIndex, rank } from '@/core/utils/compare'
 import { hoursShort, pct } from '@/core/utils/timeline'
 import { Button, Divider, Field, IconButton, Input, Panel, Segmented, Skeleton, StatusChip } from '@/ui'
 import type { CompareResponse } from '@/types'
@@ -70,8 +70,7 @@ function AddScenario() {
 }
 
 export function ScenariosPanel() {
-  const { scenarios, comparison, comparing, compareError, compare } = useMissionStore()
-  const [priority, setPriority] = useState<Priority>('balanced')
+  const { scenarios, comparison, comparing, compareError, compare, rankBy: priority, setRankBy: setPriority } = useMissionStore()
   const best = comparison ? rank(comparison.results, priority)[0] : undefined
   const bestI = best ? comparison!.results.indexOf(best) : -1
   return (
