@@ -2,7 +2,7 @@
 
 La consola obtiene datos de cuatro lugares: nuestra API, `localStorage`, un catálogo estático de misiones en el código y valores por defecto del store. No llama a ningún otro servicio. El globo carga sus teselas por su cuenta ([`02`](02-renders.md)).
 
-Esquemas y reglas de cada endpoint: `contracts/openapi.json` (copia del handoff, v1.2) y `.handoff/contracts/lunar-landing-api-contract.md`. Aquí solo se documenta **cómo los usa la consola**.
+Esquemas y reglas de cada endpoint: `contracts/openapi.json` (copia del handoff, v1.3) y `.handoff/contracts/lunar-landing-api-contract.md`. Aquí solo se documenta **cómo los usa la consola**.
 
 ## Cliente HTTP
 
@@ -26,7 +26,7 @@ Esquemas y reglas de cada endpoint: `contracts/openapi.json` (copia del handoff,
 | **Dónde** | `DataSource` en la TopBar; `ConnectionStatus` |
 | **Ignorados** | `timestamp_utc`, `data_dir`, `database`, `lola_dems`, `spice_kernels` |
 
-El mock no envía `engine` (no tiene motor de efemérides): la consola lo detecta así y rotula "Sample data". No se decide por puerto ni por URL.
+El chip dice "Live data" si `status` es `ok`, "Degraded" si no, y "Offline" si no hay respuesta. Ya no existe "Sample data": el mock no se usa.
 
 ### `GET /sites`
 
@@ -37,7 +37,7 @@ El mock no envía `engine` (no tiene motor de efemérides): la consola lo detect
 | **Dónde** | Buscador y selector de Setup, selector de Compare, pines del globo (`SET_SITES`) |
 | **Ignorados** | `polar_x_m`, `polar_y_m`, `elevation_m`, `slope_deg`, `nearest_psr_km`, `description` (la consola muestra la pendiente y la PSR de `/evaluate`, no de `/sites`) |
 
-El backend en vivo sirve 13 sitios; el mock, 8 (incluye Apollo 11, 15 y 17).
+El backend sirve 13 sitios, entre ellos Apollo 11, 15 y 17.
 
 ### `POST /evaluate`
 
@@ -114,8 +114,9 @@ De dónde sale el DEM en el backend (verificado con el backend oficial el 2026-1
 | --- | --- |
 | `GET /psr` (v1.2) | Catálogo completo de PSR para el globo (`/psr/nearby` corta en 200) |
 | `GET /ephemeris` (v1.2) | Sol y Tierra desde el centro de la Luna, para dar cielo al globo sin sitio evaluado (`P-007`) |
+| `GET /terrain/tiles/{z}/{row}/{col}.png` (v1.3, D-016) | Relieve LOLA de toda la Luna para el globo (40 m/px en el polo sur desde `z = 9`). Lo pediría el globo, no la consola: depende de `P-010` |
 
-La URL "Producción / Demo Pública" de `docs/07` sirve v1.1: ahí `/psr` y `/ephemeris` dan `404` y no llegan `checks` ni los metadatos de `grid`. La URL "Backend oficial" sirve v1.2.
+La URL "Producción / Demo Pública" de `docs/07` sirve v1.1: ahí `/psr`, `/ephemeris` y `/terrain/tiles` dan `404` y no llegan `checks` ni los metadatos de `grid`. La URL "Backend oficial" sirve v1.3 y es la que usa la consola.
 
 ## Errores que ve el usuario
 

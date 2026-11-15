@@ -10,16 +10,13 @@ LAST_FILE=".handoff-last-sync"   # hash revisado por última vez (se versiona)
 if [ -d .handoff/.git ]; then git -C .handoff pull --ff-only --quiet
 else git clone --quiet "$REPO_URL" .handoff; fi
 
-# El mock del handoff es CommonJS; este repo es ESM. Marcamos la copia local como commonjs.
-echo '{"type":"commonjs"}' > .handoff/package.json
-
 NEW=$(git -C .handoff rev-parse --short HEAD)
 OLD=$(cat "$LAST_FILE" 2>/dev/null || echo "")
 echo "handoff: ${OLD:-<nunca>} -> $NEW"
 
 if [ -n "$OLD" ] && [ "$OLD" != "$NEW" ]; then
   echo "--- Archivos cambiados en el handoff ---"
-  git -C .handoff diff --stat "$OLD" "$NEW" -- docs contracts mock PREGUNTAS.md FRONTEND_API_GUIDE.md AGENTS.md COMO-USAR-ESTE-REPO.md contexto-sesiones || true
+  git -C .handoff diff --stat "$OLD" "$NEW" -- docs contracts PREGUNTAS.md FRONTEND_API_GUIDE.md AGENTS.md COMO-USAR-ESTE-REPO.md contexto-sesiones || true
 fi
 
 if ! diff -q .handoff/contracts/openapi.json contracts/openapi.json >/dev/null; then

@@ -34,9 +34,8 @@ Lo que hoy se ve o se comporta mal, con su causa en el código, y lo que falta p
 | La franja de créditos de la escena local dice "Ephemeris: NASA/JPL Horizons" | Texto fijo en `ConsoleShell.tsx`. El backend calcula con kernels SPICE (`de421`, `de440s`), no con Horizons | Cambiarlo a algo como "Terrain and ephemeris: Lunar Navigator API · source data: LOLA DEM, JPL DE ephemerides" (pendiente de confirmar) |
 | Los créditos del globo incluyen texto en español ("Textura de regolito procedural (ilustrativa)") | `regolith.ts` del globo | Globo: traducir el crédito (la interfaz es en inglés) |
 | Las razones del veredicto en Detailed están en español | Se muestran `site.reasons` | Usar `site.checks[].message` (v1.2, en inglés) cuando el ambiente sirva v1.2; mantener `reasons` como respaldo |
-| La URL "Producción / Demo Pública" sirve v1.1 | Ver `docs/07` del handoff | Apuntar a "Backend oficial" para tener `checks`, `grid.source`, `/psr` y `/ephemeris`, o detectar capacidades |
+| La URL "Producción / Demo Pública" sirve v1.1 | Ver `docs/07` del handoff | **Resuelto en el ambiente:** la consola usa el "Backend oficial" (v1.3). Falta usar `checks` en la interfaz: tarea B5 de `docs/specs/onboarding-ayudas-sugerencias/tasks.md` |
 | La telemetría y el descenso de la escena no son física y no cambian con un NO-GO | El contrato no tiene trayectoria ni resultado de aterrizaje | Mantener el rótulo "Illustrative"; no inventar datos |
-| El mock no manda `engine` ni `timestamp_utc` en `/health` | `mock/server.js` del handoff | Se usa a propósito para detectar el mock; si el mock cambia, cambiar la detección |
 
 ## Opcionales aún sin hacer
 

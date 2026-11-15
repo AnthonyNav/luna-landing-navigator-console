@@ -6,7 +6,7 @@ Este repo solo contiene código del cliente. Trabajamos dos personas: respeta lo
 
 ## Antes de implementar (obligatorio, cada sesión)
 
-1. `npm run sync:handoff` — actualiza la copia local `.handoff/` (gitignored) y lista qué cambió en `docs/`, `contracts/`, `mock/`, `PREGUNTAS.md`, etc. desde la última revisión (`.handoff-last-sync`).
+1. `npm run sync:handoff` — actualiza la copia local `.handoff/` (gitignored) y lista qué cambió en `docs/`, `contracts/`, `PREGUNTAS.md`, etc. desde la última revisión (`.handoff-last-sync`).
 2. Si cambió algo del módulo que vas a tocar, lee el cambio antes de escribir código. Si cambió `contracts/openapi.json`: `cp .handoff/contracts/openapi.json contracts/openapi.json && npm run gen:types`.
 3. Revisa `.handoff/PREGUNTAS.md` (respuestas nuevas) y el `HANDOFF.md` de la iniciativa en `.handoff/contexto-sesiones/iniciativas/`.
 4. Al terminar la revisión: `echo <hash> > .handoff-last-sync` y commitea.
@@ -15,7 +15,7 @@ Lectura base del handoff: `AGENTS.md`, `COMO-USAR-ESTE-REPO.md`, `contracts/luna
 
 ## Reglas que no se rompen (resumen; la fuente es el handoff)
 
-- **Contrato primero:** solo endpoints/campos de `contracts/openapi.json` (v1.2: 8 endpoints; la consola usa 6, ver `docs/03-datos-y-api.md`). No inventes campos. Si doc y contrato chocan, manda el contrato.
+- **Contrato primero:** solo endpoints/campos de `contracts/openapi.json` (v1.3: 9 endpoints; la consola usa 6, ver `docs/03-datos-y-api.md`). No inventes campos. Si doc y contrato chocan, manda el contrato.
 - **No inventes datos ni reglas.** Si falta algo: pregunta en el handoff (`PREGUNTAS.md`, id `P-xxx`; no lo editamos desde aquí, ver "Preguntas pendientes") y marca el código con `// P-xxx`.
 - **Errores: decidir por `error.code`, nunca por `message`** (`src/core/api/errors.ts`).
 - **Cero red al mover el slider:** `POST /evaluate` trae `timeline[]` completo; el scrubber solo cambia `stepIndex` en el store (D-003).
@@ -32,12 +32,11 @@ React 19 + TypeScript + Vite · Tailwind v4 · three + @react-three/fiber/drei �
 
 | Comando | Qué hace |
 | --- | --- |
-| `npm run mock` | Levanta el mock del handoff (`.handoff/mock/server.js`, puerto 3000; requiere `sync:handoff` previo) |
-| `npm run dev` | Vite. Con `.env.local` apuntando a `http://localhost:3000/api/v1` usa el mock |
+| `npm run dev` | Vite, contra el backend de `VITE_API_BASE_URL` en `.env.local` |
 | `npm run gen:types` | Regenera `src/types/api.d.ts` desde `contracts/openapi.json` |
 | `npm run typecheck` / `test` / `lint` / `build` | Verificaciones |
 
-Mock vs. backend en vivo: cambia solo `VITE_API_BASE_URL` (ver `.env.example`; URLs vigentes en `.handoff/docs/07-ambientes-y-pruebas.md`).
+**Backend:** la consola se desarrolla y se prueba contra el **Backend oficial** (contrato v1.3, con `site.checks`). La URL va solo en `VITE_API_BASE_URL` (ver `.env.example`; URLs vigentes en `.handoff/docs/07-ambientes-y-pruebas.md`). **El mock del handoff no se usa** (decisión del 2026-11-14, D13 en `docs/specs/onboarding-ayudas-sugerencias/README.md`): es sintético, el Sol nunca se pone y da veredictos que no corresponden a la realidad. El estado offline se prueba apuntando a un puerto sin servidor.
 
 ## Estructura (carriles para trabajar en paralelo sin pisarse)
 
@@ -74,8 +73,6 @@ Falta: capa PSR y modos de cámara en la escena local; desplegar el globo y fija
 
 `P-001`..`P-005` fueron **respondidas el 2026-11-14** (ver `.handoff/PREGUNTAS.md`, sección Respondidas). Lo acordado, ya en `docs/06` y `docs/07` del handoff:
 
-- **Errores (contrato v1.1, D-010):** backend en vivo y mock responden `ErrorResponse` `{error:{code,message,details}}` (más `detail` opcional), con `ERR_NOT_FOUND` para rutas inexistentes. El cliente conserva el respaldo `{detail}` solo para el backend oficial, que aún no cumple `P-001` (`src/core/api/errors.ts`).
-- **URL del mock:** `http://localhost:3000/api/v1`.
-- **Latitud:** backend y mock aceptan `-90..90` y fechas `1900..2050`. El mock sirve 8 sitios (5 polares + Apollo 11, 15 y 17), así que Missions ya se prueba offline.
-- **Mock CommonJS:** se aísla con `.handoff/package.json` (lo escribe `sync-handoff.sh`).
+- **Errores (contrato v1.1, D-010):** el backend responde `ErrorResponse` `{error:{code,message,details}}` (más `detail` opcional), con `ERR_NOT_FOUND` para rutas inexistentes. El cliente conserva el respaldo `{detail}` solo para el backend oficial, que aún no cumple `P-001` (`src/core/api/errors.ts`).
+- **Latitud:** el backend acepta `-90..90` y fechas `1900..2050`. Sirve 13 sitios, entre ellos Apollo 11, 15 y 17.
 - **Tipos:** `openapi-typescript` se ejecuta vía `npx`, no está en devDependencies.
