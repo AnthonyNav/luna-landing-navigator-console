@@ -8,7 +8,7 @@ import type { CompareResponse, Evaluation, HealthResponse, PsrNearby, Site, Terr
 
 export type Workspace = 'simulate' | 'compare' | 'history' | 'missions'
 export type DetailLevel = 'simple' | 'detailed'
-/** Qué render es el fondo (handoff docs/11 §2, P-006): globo sin sitio evaluado, escena local tras evaluar. */
+/** Qué se ve en el fondo (docs/02-renders.md): el globo siempre; 'site' pone encima la escena local del parche. */
 export type ViewMode = 'globe' | 'site'
 
 export interface SelectedSite { id?: string; lat: number; lon: number; label: string; category?: string }

@@ -15,7 +15,7 @@ Lectura base del handoff: `AGENTS.md`, `COMO-USAR-ESTE-REPO.md`, `contracts/luna
 
 ## Reglas que no se rompen (resumen; la fuente es el handoff)
 
-- **Contrato primero:** solo endpoints/campos de `contracts/openapi.json` (6 endpoints: health, sites, terrain/patch, evaluate, compare, psr/nearby). No inventes campos. Si doc y contrato chocan, manda el contrato.
+- **Contrato primero:** solo endpoints/campos de `contracts/openapi.json` (v1.2: 8 endpoints; la consola usa 6, ver `docs/03-datos-y-api.md`). No inventes campos. Si doc y contrato chocan, manda el contrato.
 - **No inventes datos ni reglas.** Si falta algo: pregunta en el handoff (`PREGUNTAS.md`, id `P-xxx`; no lo editamos desde aquí, ver "Preguntas pendientes") y marca el código con `// P-xxx`.
 - **Errores: decidir por `error.code`, nunca por `message`** (`src/core/api/errors.ts`).
 - **Cero red al mover el slider:** `POST /evaluate` trae `timeline[]` completo; el scrubber solo cambia `stepIndex` en el store (D-003).
@@ -57,11 +57,15 @@ Diseño: Figma de `.handoff/docs/ideas/console-ui-figma.md`. Tokens en `src/inde
 
 Asignación de carriles entre las dos personas: _pendiente de definir_ (anótala aquí).
 
+## Cómo funciona por dentro
+
+`docs/` mapea la consola completa: arquitectura y stores (`01`), qué render se ve en cada caso y de dónde sale (`02`), qué pide a la API y qué campos usa (`03`), el puente con el globo (`04`), cada pantalla y control (`05`) y lo que falta refinar (`06`). **Si cambias un comportamiento que ahí se describe, actualiza el doc en el mismo commit.**
+
 ## Estado
 
 Fase 1 de pantallas fusionada en `main` (PR `#2`, y `#3` para el contrato v1.1): cascarón con render de fondo y paneles glass, Simulate (Simple/Detailed), Compare, History (localStorage), Missions (alunizajes reales con fuentes citadas), estados de carga/error/offline y pantalla completa.
 Fondo (handoff `docs/11`, D-013): el globo es el render único y **no se desmonta** al simular. Tras evaluar, `viewMode` sigue en `globe` y el globo vuela al sitio (`SELECT_SITE`, ~2,5 s); la escena de alunizaje corre en el mismo globo. La escena local Three.js (`/terrain/patch`) es opcional: "Terrain detail" la funde encima del globo (`viewMode: 'site'`) y "Back to globe" la quita. Sin `VITE_GLOBE_URL` o sin `READY`, tras evaluar se muestra directo la escena local.
-Puente con el globo fusionado en `main` (PR `#4`): `globeProtocol.ts` (tipos, única copia del protocolo), `globeBridge.ts` (funciones puras con pruebas), `useGlobeBridge.ts` (único archivo que habla con el iframe) y `useGlobeStore`. Envía sitios, Sol y Tierra del paso del scrubber (`sun_vector_3d`/`earth_vector_3d` tal cual), PSR y la escena de alunizaje (botón "Landing scene", que pasa al globo y vuelve con "Exit scene"). `SITE_CLICKED`/`GLOBE_CLICKED` solo seleccionan (evaluar es del usuario). Sin `READY` en 8 s el fondo vuelve al placeholder. El descenso del globo es una curva ilustrativa: la interfaz lo rotula "illustrative".
+Puente con el globo fusionado en `main` (PR `#4`): `globeProtocol.ts` (tipos, única copia del protocolo), `globeBridge.ts` (funciones puras con pruebas), `useGlobeBridge.ts` (único archivo que habla con el iframe) y `useGlobeStore`. Envía sitios, Sol y Tierra del paso del scrubber (`sun_vector_3d`/`earth_vector_3d` tal cual), PSR y la escena de alunizaje (botón "Landing scene", que corre en el mismo globo y se cierra con "Exit scene"). `SITE_CLICKED`/`GLOBE_CLICKED` solo seleccionan (evaluar es del usuario). Sin `READY` en 8 s el fondo vuelve al placeholder. El descenso del globo es una curva ilustrativa: la interfaz lo rotula "illustrative".
 **Cómo extenderlo:** guía en `.handoff/docs/11-integracion-globo-consola.md` §10. Un mensaje nuevo se añade en este orden: tipo en `globeProtocol.ts`, función pura con prueba en `globeBridge.ts`, y envío o recepción en `useGlobeBridge.ts`. No copies los tipos a otros archivos ni calcules física en el cliente.
 **Probarlo en local:** el globo (repo `luna-render-nasa-space-challenge`) con `npm run dev -- --port 5174`; en `.env.local`, `VITE_GLOBE_URL=http://localhost:5174/`; evalúa un sitio y pulsa "Landing scene".
 Falta: capa PSR y modos de cámara en la escena local; desplegar el globo y fijar `VITE_GLOBE_URL` de producción; opcionales del globo (interruptor `SET_VEHICLES`, indicador de carga con `LOADING`); probar en una GPU real.
