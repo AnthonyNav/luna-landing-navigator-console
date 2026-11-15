@@ -1,6 +1,6 @@
 // Funciones puras del puente con el globo (sin React, sin red): fáciles de probar.
-import type { Evaluation, PsrNearby, Site } from '@/types'
-import type { FromGlobe, GlobePsr, GlobeSite, ToGlobe, Vec3 } from './globeProtocol'
+import type { Evaluation, HealthResponse, PsrNearby, Site } from '@/types'
+import type { FromGlobe, GlobePsr, GlobeSite, SkyBody, ToGlobe, Vec3 } from './globeProtocol'
 
 /** Si el globo no avisa READY en este tiempo se considera no disponible y la consola sigue con su escena local. */
 export const READY_TIMEOUT_MS = 8000
@@ -31,6 +31,27 @@ export function skyMessages(evaluation: Evaluation | null, stepIndex: number): T
   if (isVec3(tp.earth_vector_3d)) out.push({ type: 'SET_EARTH_LOCAL', payload: { lat, lon, vector: tp.earth_vector_3d } })
   return out
 }
+
+/** Perfil de horizonte de `evaluate`, tal cual: la silueta que el globo dibuja es la que muestra el panel Horizon 360°. */
+export function horizonMessage(evaluation: Evaluation | null): ToGlobe | null {
+  if (!evaluation || evaluation.horizon_profile.length < 8) return null
+  const { lat, lon } = evaluation.site
+  return { type: 'SET_HORIZON', payload: { lat, lon, profile: evaluation.horizon_profile.map((p) => ({ az_deg: p.az_deg, horizon_el_deg: p.horizon_el_deg })) } }
+}
+
+/** Azimut, elevación, horizonte del terreno y visibilidad de Sol y Tierra en el paso actual (D-002: solo se dibuja). */
+export function skyStateMessage(evaluation: Evaluation | null, stepIndex: number): ToGlobe | null {
+  const t = evaluation?.timeline[stepIndex]
+  if (!t) return null
+  const body = (az: number, el: number, horizonEl: number, visible: boolean): SkyBody | null =>
+    [az, el, horizonEl].every((n) => typeof n === 'number' && Number.isFinite(n)) ? { az, el, horizonEl, visible } : null
+  const sun = body(t.sun_az_deg, t.sun_el_deg, t.sun_horizon_el_deg, t.sun_visible)
+  const earth = body(t.earth_az_deg, t.earth_el_deg, t.earth_horizon_el_deg, t.earth_visible)
+  return sun && earth ? { type: 'SET_SKY_STATE', payload: { sun, earth } } : null
+}
+
+/** Datos de muestra (mock): `/health` del contrato trae `engine`, el mock no. Misma regla que el chip de la barra superior. */
+export const isSampleData = (health: HealthResponse | null): boolean => !!health && !(health as Partial<HealthResponse>).engine
 
 /** PSR de `GET /psr/nearby`, sin tocar. */
 export const psrItems = (psrs: PsrNearby | null): GlobePsr[] =>

@@ -6,6 +6,7 @@ import { Dot, Kbd, Segmented } from '@/ui'
 import { Logo } from './Rail'
 import { WORKSPACES } from './workspaces'
 import { ConnectionStatus } from './ConnectionStatus'
+import { isSampleData } from '@/features/viewport3d/globeBridge'
 
 /** Origen de datos visible siempre (principio 5 de PRODUCT.md: datos honestos). */
 export function DataSource() {
@@ -13,7 +14,7 @@ export function DataSource() {
   const error = useMissionStore((s) => s.error)
   // El contrato exige `engine` en /health; el mock no lo envía porque no tiene motor de efemérides.
   // Se detecta por la respuesta, no por el puerto: el mock puede correr en cualquiera.
-  const isMock = !!health && !(health as Partial<typeof health>).engine
+  const isMock = isSampleData(health)
   const offline = error?.code === 'ERR_NETWORK' || (!health && !!error)
   const [label, signal] = offline ? ['Offline', 'nogo'] as const : !health ? ['Connecting', 'ink'] as const
     : isMock ? ['Sample data', 'caution'] as const : health.status === 'ok' ? ['Live data', 'go'] as const : ['Degraded', 'caution'] as const

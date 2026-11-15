@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { fromGlobe, landingMessage, psrItems, skyMessages, toGlobeSites } from './globeBridge'
-import type { Evaluation, PsrNearby, Site } from '@/types'
+import { fromGlobe, horizonMessage, isSampleData, landingMessage, psrItems, skyMessages, skyStateMessage, toGlobeSites } from './globeBridge'
+import type { Evaluation, HealthResponse, PsrNearby, Site } from '@/types'
 
 const site = (o: Partial<Site> = {}) => ({ id: 'a', name: 'A', category: 'Artemis III', lat: -84.79, lon: 31.2, ...o }) as Site
 const evaluation = (o: Record<string, unknown> = {}) =>
@@ -39,6 +39,46 @@ describe('skyMessages', () => {
   it('descarta vectores inválidos en lugar de inventar un Sol', () => {
     const bad = evaluation({ timeline: [{ sun_vector_3d: [1, 2], earth_vector_3d: [0, 1, Number.NaN] }] })
     expect(skyMessages(bad, 0)).toEqual([])
+  })
+})
+
+describe('horizonMessage', () => {
+  const profile = Array.from({ length: 360 }, (_, az) => ({ az_deg: az, horizon_el_deg: 1 + az / 100 }))
+  it('envía el perfil de 360° tal cual con lat/lon del sitio evaluado', () => {
+    const m = horizonMessage(evaluation({ horizon_profile: profile }))
+    expect(m).toEqual({ type: 'SET_HORIZON', payload: { lat: -84.79, lon: 31.2, profile } })
+  })
+  it('sin evaluación o con un perfil incompleto no envía nada', () => {
+    expect(horizonMessage(null)).toBeNull()
+    expect(horizonMessage(evaluation({ horizon_profile: profile.slice(0, 3) }))).toBeNull()
+  })
+})
+
+describe('skyStateMessage', () => {
+  const t = (o = {}) => ({ sun_az_deg: 5.4, sun_el_deg: 6.5, sun_horizon_el_deg: 1.9, sun_visible: true,
+    earth_az_deg: 322.1, earth_el_deg: 10.4, earth_horizon_el_deg: 3.2, earth_visible: true, ...o })
+  it('copia azimut, elevación, horizonte y visibilidad del paso', () => {
+    expect(skyStateMessage(evaluation({ timeline: [t()] }), 0)).toEqual({
+      type: 'SET_SKY_STATE',
+      payload: { sun: { az: 5.4, el: 6.5, horizonEl: 1.9, visible: true }, earth: { az: 322.1, el: 10.4, horizonEl: 3.2, visible: true } },
+    })
+  })
+  it('conserva "oculto" cuando el astro queda bajo el terreno', () => {
+    const m = skyStateMessage(evaluation({ timeline: [t({ sun_visible: false, sun_el_deg: 1.0 })] }), 0)
+    expect(m && m.type === 'SET_SKY_STATE' && m.payload.sun.visible).toBe(false)
+  })
+  it('descarta pasos inexistentes o con números inválidos', () => {
+    expect(skyStateMessage(null, 0)).toBeNull()
+    expect(skyStateMessage(evaluation({ timeline: [t()] }), 5)).toBeNull()
+    expect(skyStateMessage(evaluation({ timeline: [t({ sun_az_deg: Number.NaN })] }), 0)).toBeNull()
+  })
+})
+
+describe('isSampleData', () => {
+  it('el mock no trae `engine` en /health; el backend real sí', () => {
+    expect(isSampleData({ status: 'ok' } as unknown as HealthResponse)).toBe(true)
+    expect(isSampleData({ status: 'ok', engine: { available: true } } as unknown as HealthResponse)).toBe(false)
+    expect(isSampleData(null)).toBe(false)
   })
 })
 

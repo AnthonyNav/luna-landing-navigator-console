@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { ScenePhase } from '@/features/viewport3d/globeProtocol'
+import type { HorizonPhase, ScenePhase } from '@/features/viewport3d/globeProtocol'
 
 /** Estado del enlace con el globo y de la escena de alunizaje. Aparte del store de misión: lo escribe solo el puente. */
 export type GlobeLink = 'idle' | 'loading' | 'ready' | 'unavailable'
@@ -7,9 +7,17 @@ export interface Landing { requested: boolean; phase: ScenePhase | null; altM: n
 
 const NONE: Landing = { requested: false, phase: null, altM: null, vMps: null, error: null }
 
+/** Vista de horizonte (Lander POV): la cámara baja al suelo del sitio y mira el cielo sobre su horizonte real. */
+export interface Horizon { requested: boolean; phase: HorizonPhase | null }
+const HORIZON_NONE: Horizon = { requested: false, phase: null }
+
 interface GlobeState {
   link: GlobeLink
   landing: Landing
+  horizon: Horizon
+  requestHorizon: () => void
+  clearHorizon: () => void
+  setHorizonPhase: (p: HorizonPhase) => void
   setLink: (l: GlobeLink) => void
   requestLanding: () => void
   clearLanding: () => void
@@ -21,8 +29,13 @@ interface GlobeState {
 export const useGlobeStore = create<GlobeState>((set) => ({
   link: 'idle',
   landing: NONE,
+  horizon: HORIZON_NONE,
+  requestHorizon: () => set({ horizon: { requested: true, phase: null }, landing: NONE }),
+  clearHorizon: () => set({ horizon: HORIZON_NONE }),
+  setHorizonPhase: (phase) => set((s) => ({ horizon: { ...s.horizon, phase } })),
   setLink: (link) => set({ link }),
-  requestLanding: () => set({ landing: { ...NONE, requested: true } }),
+  // La escena de alunizaje y la vista de horizonte se excluyen: el globo solo muestra una a la vez
+  requestLanding: () => set({ landing: { ...NONE, requested: true }, horizon: HORIZON_NONE }),
   clearLanding: () => set({ landing: NONE }),
   setPhase: (phase) => set((s) => ({ landing: { ...s.landing, phase } })),
   setTelemetry: (altM, vMps) => set((s) => ({ landing: { ...s.landing, altM, vMps } })),
