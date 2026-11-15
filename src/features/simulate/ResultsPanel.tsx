@@ -160,8 +160,17 @@ export function ResultsPanel() {
         : error ? <ErrorNotice />
         : !evaluation ? <p className="text-[13px] leading-[19px] text-ink-2">Choose a landing site and a date, then run the simulation to see sunlight, the link to Earth and the ground.</p>
         : detail === 'detailed' ? <Detailed /> : <Simple />}
+      {!loading && !error && evaluation && <AuxNotice />}
     </Panel>
   )
+}
+
+/** El veredicto llegó, pero el parche de terreno o las PSR no: se dice qué falta en lugar de fallar toda la corrida. */
+function AuxNotice() {
+  const failed = useMissionStore((s) => s.auxFailed)
+  if (failed.length === 0) return null
+  const what = failed.map((f) => (f === 'terrain' ? 'the local terrain patch' : 'the nearby shadowed regions')).join(' and ')
+  return <p role="status" className="text-xs text-caution">The verdict is complete, but {what} could not be loaded. Run again to retry.</p>
 }
 
 /** Decide por `code`, nunca por el mensaje (AGENTS.md del handoff). */
